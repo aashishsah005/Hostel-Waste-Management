@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #F2F0E3;
+  color: #1F2A22;
+  font-family: 'Manrope', sans-serif;
+}
+
+.font-display {
+  font-family: 'Fraunces', serif;
+}
+
+::selection {
+  background-color: #DFA13B;
+  color: #1F2A22;
+}
+
+:focus-visible {
+  outline: 2px solid #2F4B3C;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* subtle grain / paper texture */
+.bg-grain {
+  background-image: radial-gradient(rgba(31,42,34,0.035) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #A9BCA1;
+  border-radius: 999px;
+}
