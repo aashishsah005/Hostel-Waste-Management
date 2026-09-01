@@ -40,6 +40,7 @@ async function seed() {
   console.log('Creating users...');
   const admin = await User.create({ name: 'Admin User', email: 'admin@hostel.edu', password: 'admin123', role: 'admin' });
   const manager = await User.create({ name: 'Mess Manager', email: 'manager@hostel.edu', password: 'manager123', role: 'mess_manager' });
+  const student = await User.create({ name: 'Student User', email: 'abc@gmail.com', password: '123', role: 'student', hostelBlock: 'A', roomNumber: '101', phone: '9876543210' });
 
   console.log('Creating weekly menu...');
   for (const day of DAYS) {
@@ -82,6 +83,7 @@ async function seed() {
   console.log('Login credentials:');
   console.log('  Admin        -> admin@hostel.edu / admin123');
   console.log('  Mess Manager -> manager@hostel.edu / manager123');
+  console.log('  Student      -> abc@gmail.com / 123');
 
   await mongoose.connection.close();
   process.exit(0);

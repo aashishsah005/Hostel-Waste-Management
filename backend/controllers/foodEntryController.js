@@ -3,8 +3,7 @@ const { predictFromHistory } = require('../utils/predictDemand');
 
 const createFoodEntry = async (req, res, next) => {
   try {
-    const { date, mealType, mealsBooked, mealsPrepared, mealsConsumed, foodWastedKg, wasteReason, notes } = req.body;
-    const entry = await FoodEntry.create({
+    const {
       date,
       mealType,
       mealsBooked,
@@ -13,8 +12,34 @@ const createFoodEntry = async (req, res, next) => {
       foodWastedKg,
       wasteReason,
       notes,
+      targetPreparation,
+      expectedDiners,
+      aiRecommendedPrep,
+    } = req.body;
+
+    const payload = {
+      date,
+      mealType,
+      mealsBooked: Number(mealsBooked) || 0,
+      mealsPrepared: Number(mealsPrepared) || 0,
+      mealsConsumed: Number(mealsConsumed) || 0,
+      foodWastedKg: Number(foodWastedKg) || 0,
+      wasteReason: wasteReason || 'none',
+      notes: notes || '',
       recordedBy: req.user._id,
-    });
+    };
+
+    if (targetPreparation !== undefined && targetPreparation !== null && targetPreparation !== '') {
+      payload.targetPreparation = Math.max(0, Number(targetPreparation));
+    }
+    if (expectedDiners !== undefined && expectedDiners !== null && expectedDiners !== '') {
+      payload.expectedDiners = Math.max(0, Number(expectedDiners));
+    }
+    if (aiRecommendedPrep !== undefined && aiRecommendedPrep !== null && aiRecommendedPrep !== '') {
+      payload.aiRecommendedPrep = Math.max(0, Number(aiRecommendedPrep));
+    }
+
+    const entry = await FoodEntry.create(payload);
     res.status(201).json(entry);
   } catch (err) {
     if (err.code === 11000) {

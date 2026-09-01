@@ -25,16 +25,19 @@ const Register = () => {
       await register(form);
       navigate('/student');
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+      setError(err.response?.data?.message || 'Server connection failed. Please ensure the backend server (port 5000) is running.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto px-5 py-20">
-      <h1 className="font-display text-3xl text-ink mb-2">Create your account</h1>
-      <p className="text-ink/60 mb-8">Students and visitors can self-register. Staff accounts are created by the admin.</p>
+    <div className="max-w-md mx-auto px-5 py-12">
+      <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-forest hover:underline mb-6">
+        <span>←</span> Back to Home
+      </Link>
+      <h1 className="font-display text-3xl font-bold text-ink mb-2">Create your account</h1>
+      <p className="text-ink/60 text-sm mb-8">Students and visitors can self-register. Staff accounts are created by the admin.</p>
 
       <form onSubmit={handleSubmit} className="bg-cardcream rounded-card border border-ink/10 p-6 shadow-soft space-y-4">
         {error && <div className="text-sm text-clay bg-clay/10 border border-clay/20 rounded-lg px-3 py-2">{error}</div>}

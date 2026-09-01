@@ -15,6 +15,9 @@ const foodEntrySchema = new mongoose.Schema(
     },
     recordedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     notes: { type: String, default: '' },
+    targetPreparation: { type: Number, min: 0 },
+    expectedDiners: { type: Number, min: 0 },
+    aiRecommendedPrep: { type: Number, min: 0 },
   },
   { timestamps: true }
 );

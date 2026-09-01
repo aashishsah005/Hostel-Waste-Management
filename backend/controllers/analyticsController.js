@@ -130,5 +130,115 @@ const getPublicStats = async (req, res, next) => {
 
 
 
-module.exports = { getWasteSummary, getFeedbackSummary, getPublicStats };
+const getKitchenPerformance = async (req, res, next) => {
+  try {
+    const filter = {};
+    if (req.query.from || req.query.to) {
+      filter.date = {};
+      if (req.query.from) {
+        const fromStr = req.query.from.slice(0, 10);
+        const [y, m, d] = fromStr.split('-').map(Number);
+        const startMs = Date.UTC(y, m - 1, d, 0, 0, 0) - (5.5 * 3600 * 1000);
+        filter.date.$gte = new Date(startMs);
+      }
+      if (req.query.to) {
+        const toStr = req.query.to.slice(0, 10);
+        const [y, m, d] = toStr.split('-').map(Number);
+        const endMs = Date.UTC(y, m - 1, d, 23, 59, 59, 999) - (5.5 * 3600 * 1000);
+        filter.date.$lte = new Date(endMs);
+      }
+    }
+    if (req.query.mealType) {
+      filter.mealType = req.query.mealType;
+    }
+
+    const entries = await FoodEntry.find(filter).sort({ date: -1 });
+    const COST_PER_KG = 60;
+    const CO2E_PER_KG = 2.5;
+
+    const performance = entries.map((e) => {
+      const prepared = e.mealsPrepared || 0;
+      const consumed = e.mealsConsumed || 0;
+      const wastedKg = e.foodWastedKg || 0;
+      const target = e.targetPreparation;
+      const aiRec = e.aiRecommendedPrep;
+      const expected = e.expectedDiners;
+
+      // Waste %
+      const wastePercentage = prepared > 0
+        ? Math.min(100, Math.round((wastedKg / (prepared * 0.35)) * 1000) / 10)
+        : 0;
+
+      // Prep Variance
+      const prepVariance = target !== undefined && target !== null ? prepared - target : null;
+
+      // AI Error & Accuracy %
+      let aiErrorPercentage = null;
+      let aiAccuracyPercentage = null;
+      if (aiRec !== undefined && aiRec !== null && consumed > 0) {
+        const errVal = (Math.abs(aiRec - consumed) / Math.max(1, consumed)) * 100;
+        aiErrorPercentage = Math.round(errVal * 10) / 10;
+        aiAccuracyPercentage = Math.max(0, Math.round((100 - aiErrorPercentage) * 10) / 10);
+      }
+
+      // Target Accuracy %
+      let targetAccuracyPercentage = null;
+      if (target !== undefined && target !== null && target > 0) {
+        const targetErrVal = (Math.abs(prepared - target) / Math.max(1, target)) * 100;
+        targetAccuracyPercentage = Math.max(0, Math.round((100 - targetErrVal) * 10) / 10);
+      }
+
+      // Cost & Carbon
+      const estimatedCostLost = Math.round(wastedKg * COST_PER_KG);
+      const estimatedCarbonKg = Math.round(wastedKg * CO2E_PER_KG * 100) / 100;
+
+      // Status
+      let statusKey = 'completed';
+      let statusLabel = '✓ Logged';
+
+      if (target !== undefined && target !== null && target > 0) {
+        const tolerance = Math.max(5, target * 0.05);
+        if (prepared < target - tolerance) {
+          statusKey = 'under_preparation';
+          statusLabel = '🔴 Under-preparation';
+        } else if (prepared > target + tolerance) {
+          statusKey = 'over_preparation';
+          statusLabel = '🟡 Over-preparation';
+        } else {
+          statusKey = 'balanced';
+          statusLabel = '🟢 Balanced';
+        }
+      }
+
+      return {
+        _id: e._id,
+        date: e.date,
+        mealType: e.mealType,
+        expectedDiners: expected ?? null,
+        targetPreparation: target ?? null,
+        aiRecommendedPrep: aiRec ?? null,
+        mealsPrepared: prepared,
+        mealsConsumed: consumed,
+        foodWastedKg: wastedKg,
+        wasteReason: e.wasteReason,
+        notes: e.notes,
+        wastePercentage,
+        prepVariance,
+        aiErrorPercentage,
+        aiAccuracyPercentage,
+        targetAccuracyPercentage,
+        estimatedCostLost,
+        estimatedCarbonKg,
+        status: statusKey,
+        statusLabel,
+      };
+    });
+
+    res.json(performance);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getWasteSummary, getFeedbackSummary, getPublicStats, getKitchenPerformance };
 
