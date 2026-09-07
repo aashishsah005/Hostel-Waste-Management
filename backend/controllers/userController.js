@@ -76,7 +76,7 @@ const getAdminOverview = async (req, res, next) => {
       Booking.countDocuments({ date: { $gte: start, $lte: end }, status: 'skipped', isVisitorPass: { $ne: true } }),
       Booking.aggregate([
         { $match: { date: { $gte: start, $lte: end }, isVisitorPass: true, paymentStatus: 'paid', status: 'booked' } },
-        { $group: { _id: null, count: { $sum: 1 }, revenue: { $sum: '$paymentAmount' } } },
+        { $group: { _id: null, count: { $sum: { $ifNull: ['$quantity', 1] } }, revenue: { $sum: '$paymentAmount' } } },
       ]),
     ]);
 

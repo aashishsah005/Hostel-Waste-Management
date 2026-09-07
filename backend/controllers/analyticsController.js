@@ -58,7 +58,10 @@ const getWasteSummary = async (req, res, next) => {
 
 const getFeedbackSummary = async (req, res, next) => {
   try {
-    const feedback = await Feedback.find().sort({ createdAt: -1 }).limit(200);
+    const feedback = await Feedback.find()
+      .populate('user', 'name hostelBlock roomNumber role')
+      .sort({ createdAt: -1 })
+      .limit(200);
     const count = feedback.length;
     const avg = (key) => (count ? Math.round((feedback.reduce((s, f) => s + f[key], 0) / count) * 10) / 10 : 0);
 

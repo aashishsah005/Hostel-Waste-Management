@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { KeyRound, GraduationCap, ChefHat, ShieldCheck } from 'lucide-react';
 
 const roleHome = {
   admin: '/admin',
@@ -72,14 +73,18 @@ const Login = () => {
       </form>
 
       <div className="mt-6 text-xs text-ink/70 bg-turmeric/10 border border-turmeric/30 rounded-xl p-4 space-y-2">
-        <p className="font-bold text-ink text-sm mb-1">🔑 Demo Accounts Quick Login</p>
+        <p className="font-bold text-ink text-sm mb-1 flex items-center gap-1.5">
+          <KeyRound className="w-4 h-4 text-turmeric-dark shrink-0" /> Demo Accounts Quick Login
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
           <button
             type="button"
             onClick={() => setForm({ email: 'abc@gmail.com', password: '123' })}
             className="px-3 py-2 rounded-lg bg-paper border border-ink/15 hover:border-forest text-left transition-colors cursor-pointer"
           >
-            <div className="font-bold text-forest">🎓 Student</div>
+            <div className="font-bold text-forest flex items-center gap-1.5">
+              <GraduationCap className="w-4 h-4 shrink-0" /> Student
+            </div>
             <div className="text-[10px] text-ink/50 font-mono">abc@gmail.com</div>
             <div className="text-[10px] text-ink/40 font-mono">Pass: 123</div>
           </button>
@@ -88,7 +93,9 @@ const Login = () => {
             onClick={() => setForm({ email: 'manager@hostel.edu', password: '123' })}
             className="px-3 py-2 rounded-lg bg-paper border border-ink/15 hover:border-forest text-left transition-colors cursor-pointer"
           >
-            <div className="font-bold text-turmeric-dark">👨‍🍳 Mess Manager</div>
+            <div className="font-bold text-turmeric-dark flex items-center gap-1.5">
+              <ChefHat className="w-4 h-4 shrink-0" /> Mess Manager
+            </div>
             <div className="text-[10px] text-ink/50 font-mono">manager@hostel.edu</div>
             <div className="text-[10px] text-ink/40 font-mono">Pass: 123 / manager123</div>
           </button>
@@ -97,7 +104,9 @@ const Login = () => {
             onClick={() => setForm({ email: 'admin@hostel.edu', password: 'admin123' })}
             className="px-3 py-2 rounded-lg bg-paper border border-ink/15 hover:border-forest text-left transition-colors cursor-pointer"
           >
-            <div className="font-bold text-clay">⚙️ Admin</div>
+            <div className="font-bold text-clay flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 shrink-0" /> Admin
+            </div>
             <div className="text-[10px] text-ink/50 font-mono">admin@hostel.edu</div>
             <div className="text-[10px] text-ink/40 font-mono">Pass: admin123</div>
           </button>

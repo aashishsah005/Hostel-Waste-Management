@@ -186,6 +186,7 @@ const unskipMeal = async (req, res, next) => {
 const bookVisitorMeal = async (req, res, next) => {
   try {
     const { date, mealType, visitorName, phone, purpose } = req.body;
+    const quantity = Math.max(1, parseInt(req.body.quantity, 10) || 1);
 
     if (!date || !mealType || !visitorName || !phone) {
       return res.status(400).json({ message: 'date, mealType, visitorName, and phone are required' });
@@ -226,25 +227,10 @@ const bookVisitorMeal = async (req, res, next) => {
     // Authoritative pricing from active MenuItem
     const menuItem = await MenuItem.findOne({ dayOfWeek, mealType, isActive: true });
     const fallbackPrices = { Breakfast: 40, Lunch: 40, Snacks: 20, Dinner: 40 };
-    const paymentAmount = menuItem?.price || fallbackPrices[mealType] || 40;
+    const unitPrice = menuItem?.price || fallbackPrices[mealType] || 40;
+    const paymentAmount = unitPrice * quantity;
 
-    // Check for existing paid visitor pass for this user, date, mealType
-    const existing = await Booking.findOne({
-      student: req.user._id,
-      date: targetDate,
-      mealType,
-      isVisitorPass: true,
-      paymentStatus: 'paid',
-    });
-
-    if (existing) {
-      return res.status(200).json({
-        message: `Visitor pass already booked and paid for ${mealType} on ${date}.`,
-        booking: existing,
-      });
-    }
-
-    // Generate unique Dummy Transaction ID & Token Code
+    // Generate unique Dummy Transaction ID & single Token Code
     const yyyymmdd = targetDate.toISOString().slice(0, 10).replace(/-/g, '');
     const randTxnSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
     const transactionId = `TXN-DEMO-${yyyymmdd}-${randTxnSuffix}`;
@@ -252,7 +238,7 @@ const bookVisitorMeal = async (req, res, next) => {
     const randTokenSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
     const tokenCode = `VIS-${randTokenSuffix}`;
 
-    // Create Paid Visitor Booking Record
+    // Create Paid Visitor Booking Record with Single Unified Token for the group
     const booking = await Booking.create({
       student: req.user._id,
       date: targetDate,
@@ -261,19 +247,21 @@ const bookVisitorMeal = async (req, res, next) => {
       isVisitorPass: true,
       paymentStatus: 'paid',
       paymentAmount,
+      quantity,
+      visitorName,
+      tokenCode,
       paymentMethod: 'dummy',
       transactionId,
       paidAt: new Date(),
-      tokenCode,
       phone,
-      purpose: purpose || `Visitor Pass for ${visitorName}`,
+      purpose: purpose || `${quantity} Visitor Pass(es) for ${visitorName}`,
     });
 
     // Notify Mess Managers asynchronously
     const dateDisplay = targetDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     notifyManagers({
       title: '💳 Visitor Meal Payment',
-      message: `${visitorName} purchased a ${mealType} visitor pass for ₹${paymentAmount} on ${dateDisplay}. Transaction: ${transactionId}.`,
+      message: `${visitorName} purchased ${quantity} ${mealType} visitor pass(es) for ₹${paymentAmount} on ${dateDisplay}. Transaction: ${transactionId}.`,
       type: 'manager_payment_alert',
       mealType,
       date: targetDate,
@@ -281,21 +269,24 @@ const bookVisitorMeal = async (req, res, next) => {
     });
 
     res.status(201).json({
-      message: 'Visitor meal pass booked and paid successfully!',
+      message: `${quantity} Visitor meal pass(es) booked and paid successfully!`,
       booking: {
         _id: booking._id,
         date: date.slice(0, 10),
         mealType,
         visitorName,
         phone,
+        quantity,
         purpose: booking.purpose,
         isVisitorPass: true,
         paymentStatus: 'paid',
         paymentAmount,
+        unitPrice,
         paymentMethod: 'dummy',
         transactionId,
         paidAt: booking.paidAt,
         tokenCode,
+        tokenCodes,
       },
     });
   } catch (err) {
@@ -359,7 +350,7 @@ const getBookingCounts = async (req, res, next) => {
                     { $eq: ['$status', 'booked'] },
                   ],
                 },
-                1,
+                { $ifNull: ['$quantity', 1] },
                 0,
               ],
             },

@@ -4,25 +4,42 @@ import api from '../../api/axios';
 import Loader from '../../components/Loader';
 import StatCard from '../../components/StatCard';
 import PlateGauge from '../../components/PlateGauge';
+import {
+  LayoutDashboard,
+  GraduationCap,
+  ChefHat,
+  Palmtree,
+  Ticket,
+  TrendingUp,
+  ShieldCheck,
+  Ban,
+  UserPlus,
+  CreditCard,
+  Sunrise,
+  Sun,
+  Coffee,
+  Moon,
+  Utensils
+} from 'lucide-react';
 
 const MEALS = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const COLORS = ['#2F4B3C', '#DFA13B', '#A64B34', '#7C9473', '#3E6350', '#B87F24'];
 
 const MEAL_ICONS = {
-  Breakfast: '🍳',
-  Lunch: '🍛',
-  Snacks: '☕',
-  Dinner: '🍽️',
+  Breakfast: <Sunrise className="w-4 h-4 text-turmeric-dark shrink-0" />,
+  Lunch: <Sun className="w-4 h-4 text-forest shrink-0" />,
+  Snacks: <Coffee className="w-4 h-4 text-turmeric-dark shrink-0" />,
+  Dinner: <Moon className="w-4 h-4 text-forest-dark shrink-0" />,
 };
 
 const tabs = [
-  { id: 'overview', label: 'Overview', icon: '📊' },
-  { id: 'students', label: 'Students', icon: '👨‍🎓' },
-  { id: 'managers', label: 'Mess Managers', icon: '👨‍🍳' },
-  { id: 'vacations', label: 'Vacations', icon: '🏠' },
-  { id: 'visitors', label: 'Visitor Passes', icon: '🎟️' },
-  { id: 'analytics', label: 'System Analytics', icon: '📈' },
+  { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4 shrink-0" /> },
+  { id: 'students', label: 'Students', icon: <GraduationCap className="w-4 h-4 shrink-0" /> },
+  { id: 'managers', label: 'Mess Managers', icon: <ChefHat className="w-4 h-4 shrink-0" /> },
+  { id: 'vacations', label: 'Vacations', icon: <Palmtree className="w-4 h-4 shrink-0" /> },
+  { id: 'visitors', label: 'Visitor Passes', icon: <Ticket className="w-4 h-4 shrink-0" /> },
+  { id: 'analytics', label: 'System Analytics', icon: <TrendingUp className="w-4 h-4 shrink-0" /> },
 ];
 
 const AdminDashboard = () => {
@@ -57,7 +74,9 @@ const AdminDashboard = () => {
         <div className="bg-paper px-4 py-3 rounded-2xl border border-ink/10 text-right shadow-soft shrink-0">
           <div className="text-[10px] font-mono uppercase text-ink/50 font-bold">Today's Date</div>
           <div className="font-display font-bold text-base text-ink mt-0.5">{todayDateDisplay}</div>
-          <div className="text-[10px] font-mono text-forest font-semibold mt-0.5">🛡️ Admin Authorized</div>
+          <div className="text-[10px] font-mono text-forest font-semibold mt-0.5 flex items-center justify-end gap-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-forest" /> Admin Authorized
+          </div>
         </div>
       </div>
 
@@ -183,9 +202,21 @@ const OverviewTab = () => {
                       <span>{m}</span>
                     </td>
                     <td className="py-3 px-3 font-semibold text-ink/80">{expectedStudents}</td>
-                    <td className="py-3 px-3 text-clay font-bold">🚫 {skipped}</td>
-                    <td className="py-3 px-3 text-turmeric-dark font-bold">🎟️ {visitors}</td>
-                    <td className="py-3 px-3 font-bold text-forest text-sm">👨‍🍳 {finalDemand}</td>
+                    <td className="py-3 px-3 text-clay font-bold">
+                      <span className="inline-flex items-center gap-1">
+                        <Ban className="w-3.5 h-3.5 shrink-0 text-clay" /> {skipped}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-turmeric-dark font-bold">
+                      <span className="inline-flex items-center gap-1">
+                        <Ticket className="w-3.5 h-3.5 shrink-0 text-turmeric-dark" /> {visitors}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 font-bold text-forest text-sm">
+                      <span className="inline-flex items-center gap-1">
+                        <ChefHat className="w-3.5 h-3.5 shrink-0 text-forest" /> {finalDemand}
+                      </span>
+                    </td>
                   </tr>
                 );
               })}
@@ -390,7 +421,9 @@ const ManagersTab = () => {
   return (
     <div className="grid md:grid-cols-3 gap-6">
       <form onSubmit={createStaff} className="bg-cardcream rounded-card border border-ink/10 p-6 md:p-8 space-y-4 h-fit shadow-soft">
-        <h3 className="font-display text-xl font-bold text-ink">➕ Add Staff / Manager</h3>
+        <h3 className="font-display text-xl font-bold text-ink flex items-center gap-2">
+          <UserPlus className="w-5 h-5 text-forest" /> Add Staff / Manager
+        </h3>
 
         <div>
           <label className="block text-xs uppercase tracking-wide text-ink/50 font-semibold mb-1">Full Name</label>
@@ -444,12 +477,14 @@ const ManagersTab = () => {
           Create Account →
         </button>
 
-        {status === 'success' && <p className="text-xs text-forest font-semibold text-center bg-forest/10 p-2 rounded-lg">✓ Staff account created!</p>}
+        {status === 'success' && <p className="text-xs text-forest font-semibold text-center bg-forest/10 p-2 rounded-lg">Staff account created!</p>}
         {status && status !== 'success' && <p className="text-xs text-clay font-semibold text-center bg-clay/10 p-2 rounded-lg">{status}</p>}
       </form>
 
       <div className="md:col-span-2 space-y-3">
-        <h3 className="font-display text-xl font-bold text-ink">👨‍🍳 Active Mess Managers</h3>
+        <h3 className="font-display text-xl font-bold text-ink flex items-center gap-2">
+          <ChefHat className="w-5 h-5 text-turmeric-dark" /> Active Mess Managers
+        </h3>
         {loading ? (
           <Loader label="Loading manager accounts..." />
         ) : (
@@ -571,13 +606,14 @@ const VacationsTab = () => {
                       <td className="py-3 px-3 font-bold text-clay">{v.totalMealsSkipped} meals</td>
                       <td className="py-3 px-3">
                         <span
-                          className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold ${
+                          className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold inline-flex items-center gap-1.5 ${
                             v.status === 'active'
                               ? 'bg-forest/10 text-forest border border-forest/20'
                               : 'bg-paper text-ink/50 border border-ink/15'
                           }`}
                         >
-                          {v.status === 'active' ? '🟢 Active' : '⚪ Cancelled'}
+                          <span className={`w-1.5 h-1.5 rounded-full ${v.status === 'active' ? 'bg-forest' : 'bg-ink/30'}`} />
+                          {v.status === 'active' ? 'Active' : 'Cancelled'}
                         </span>
                       </td>
                     </tr>
@@ -662,8 +698,8 @@ const VisitorsTab = () => {
                       <td className="py-3 px-3 text-ink/70 font-semibold">{p.transactionId}</td>
                       <td className="py-3 px-3 font-bold text-turmeric-dark">{p.tokenCode}</td>
                       <td className="py-3 px-3">
-                        <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-forest/10 text-forest border border-forest/20">
-                          💳 Paid
+                        <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-forest/10 text-forest border border-forest/20 inline-flex items-center gap-1">
+                          <CreditCard className="w-3 h-3 text-forest" /> Paid
                         </span>
                       </td>
                     </tr>

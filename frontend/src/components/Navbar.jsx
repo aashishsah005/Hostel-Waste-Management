@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { Bell, User, Calendar, Clock, X, Ban } from 'lucide-react';
 
 const roleHome = {
   admin: '/admin',
@@ -173,7 +174,7 @@ const Navbar = () => {
                     className="p-2 rounded-full border border-ink/15 text-ink hover:border-forest/50 hover:bg-cardcream transition-all relative cursor-pointer"
                     aria-label="Notifications"
                   >
-                    <span className="text-base leading-none">🔔</span>
+                    <Bell className="w-4 h-4" />
                     {unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-clay text-paper font-mono text-[9px] font-bold flex items-center justify-center animate-pulse">
                         {unreadCount}
@@ -186,7 +187,7 @@ const Navbar = () => {
                     <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-cardcream rounded-2xl border border-ink/10 shadow-lift p-4 z-50 text-left space-y-3 font-body">
                       <div className="flex items-center justify-between border-b border-ink/10 pb-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-base">🔔</span>
+                          <Bell className="w-4 h-4 text-forest" />
                           <span className="font-display font-bold text-sm text-ink">
                             {user.role === 'mess_manager' ? 'Manager Alerts' : 'Notifications'}
                           </span>
@@ -198,9 +199,9 @@ const Navbar = () => {
                         </div>
                         <button
                           onClick={() => setShowDropdown(false)}
-                          className="text-xs text-ink/40 hover:text-ink font-bold cursor-pointer"
+                          className="text-xs text-ink/40 hover:text-ink font-bold cursor-pointer p-1"
                         >
-                          ✕
+                          <X className="w-4 h-4" />
                         </button>
                       </div>
 
@@ -239,8 +240,9 @@ const Navbar = () => {
 
                               {/* SENDER STUDENT BADGE FOR MANAGERS */}
                               {n.senderStudent && (
-                                <div className="text-[11px] font-mono text-turmeric-dark font-bold mt-1 flex items-center gap-1">
-                                  <span>👤 Student: {n.senderStudent.name}</span>
+                                <div className="text-[11px] font-mono text-turmeric-dark font-bold mt-1 flex items-center gap-1.5">
+                                  <User className="w-3.5 h-3.5 shrink-0" />
+                                  <span>Student: {n.senderStudent.name}</span>
                                   {n.senderStudent.roomNumber && (
                                     <span className="text-ink/40 font-normal">(Room {n.senderStudent.roomNumber})</span>
                                   )}
@@ -249,9 +251,15 @@ const Navbar = () => {
 
                               {/* MEAL DATE & TIMING BADGES */}
                               {n.mealType && n.date && (
-                                <div className="text-[11px] font-mono text-forest font-semibold mt-1.5 flex flex-wrap items-center gap-2">
-                                  <span>📅 {new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                                  <span>⏰ {MEAL_TIMINGS[n.mealType] || 'Standard Time'}</span>
+                                <div className="text-[11px] font-mono text-forest font-semibold mt-1.5 flex flex-wrap items-center gap-3">
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3 shrink-0" />
+                                    {new Date(n.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3 shrink-0" />
+                                    {MEAL_TIMINGS[n.mealType] || 'Standard Time'}
+                                  </span>
                                 </div>
                               )}
 
@@ -272,9 +280,10 @@ const Navbar = () => {
                                       e.stopPropagation();
                                       handleSkipFromNotification(n);
                                     }}
-                                    className="px-3.5 py-1.5 rounded-full bg-clay text-paper font-semibold text-[11px] hover:bg-clay-dark transition-colors shadow-soft cursor-pointer"
+                                    className="px-3.5 py-1.5 rounded-full bg-clay text-paper font-semibold text-[11px] hover:bg-clay-dark transition-colors shadow-soft cursor-pointer flex items-center gap-1"
                                   >
-                                    🚫 Skip {n.mealType}
+                                    <Ban className="w-3 h-3 shrink-0" />
+                                    <span>Skip {n.mealType}</span>
                                   </button>
                                 </div>
                               )}
@@ -346,7 +355,7 @@ const Navbar = () => {
               <>
                 {unreadCount > 0 && (
                   <div className="text-xs text-clay font-bold flex items-center gap-1.5 py-1">
-                    <span>🔔</span> {unreadCount} Unread Notifications
+                    <Bell className="w-3.5 h-3.5" /> {unreadCount} Unread Notifications
                   </div>
                 )}
                 <Link to={roleHome[user.role] || '/'} onClick={() => setOpen(false)} className="text-ink/80 font-semibold">

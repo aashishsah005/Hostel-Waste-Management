@@ -3,6 +3,23 @@ import { Link, useLocation } from 'react-router-dom';
 import PlateGauge from '../components/PlateGauge';
 import api from '../api/axios';
 import thaliImg from '../assets/indian_thali_hero.jpg';
+import {
+  Calendar,
+  Ticket,
+  History,
+  Star,
+  QrCode,
+  BarChart3,
+  ClipboardList,
+  Tag,
+  TrendingUp,
+  Utensils,
+  MessageSquare,
+  Users,
+  Leaf,
+  Coins,
+  Cloud
+} from 'lucide-react';
 
 const workflowSteps = [
   {
@@ -153,31 +170,31 @@ const studentCapabilities = [
     title: 'Weekly Menu Schedule',
     desc: 'Check daily breakfast, lunch, snacks, and dinner offerings and prices anytime.',
     tag: 'Menu',
-    icon: '📅',
+    icon: <Calendar className="w-6 h-6 text-forest" />,
   },
   {
     title: 'One-Tap Meal RSVPs',
     desc: 'Confirm your attendance for upcoming meals so the kitchen prepares exact portions.',
     tag: 'RSVP',
-    icon: '🎟️',
+    icon: <Ticket className="w-6 h-6 text-turmeric-dark" />,
   },
   {
     title: 'Meal Booking History',
     desc: 'Track your active, consumed, and past meal reservations in a clean history log.',
     tag: 'History',
-    icon: '📜',
+    icon: <History className="w-6 h-6 text-forest-light" />,
   },
   {
     title: '3-Axis Meal Feedback',
     desc: 'Rate taste, cleanliness, and service speed with comments to help improve mess quality.',
     tag: 'Rating',
-    icon: '⭐',
+    icon: <Star className="w-6 h-6 text-turmeric-dark" />,
   },
   {
     title: 'Visitor Thali Pass',
     desc: 'Generate guest meal tokens with encrypted QR codes for parents and visitors.',
     tag: 'Guest Pass',
-    icon: '🎫',
+    icon: <QrCode className="w-6 h-6 text-clay" />,
   },
 ];
 
@@ -186,37 +203,37 @@ const staffCapabilities = [
     title: 'Weighted Demand Prediction',
     desc: 'Calculate optimal cooking quantities blending 7-day weighted history, live RSVPs, and 5% safety buffer.',
     tag: 'Prediction',
-    icon: '📊',
+    icon: <BarChart3 className="w-6 h-6 text-turmeric-dark" />,
   },
   {
     title: 'Daily Food Entry Logger',
     desc: 'Record exact meals prepared, consumed, food wasted in kg, and add operational notes.',
     tag: 'Daily Log',
-    icon: '📝',
+    icon: <ClipboardList className="w-6 h-6 text-forest" />,
   },
   {
     title: 'Root-Cause Waste Tagging',
     desc: 'Classify waste drivers — exam periods, holidays, weather, unpopular recipes, or over-prep.',
     tag: 'Root Cause',
-    icon: '🏷️',
+    icon: <Tag className="w-6 h-6 text-clay" />,
   },
   {
     title: '30-Day Waste Trend Analytics',
     desc: 'Interactive Recharts line charts and cause breakdown bar graphs for hostel administration.',
     tag: 'Analytics',
-    icon: '📈',
+    icon: <TrendingUp className="w-6 h-6 text-forest-light" />,
   },
   {
     title: 'Weekly Menu Management',
     desc: 'Add, update, or remove daily menu slots and pricing in real time.',
     tag: 'Menu Editor',
-    icon: '🍳',
+    icon: <Utensils className="w-6 h-6 text-turmeric-dark" />,
   },
   {
     title: 'Feedback NLP Insights',
     desc: 'Inspect average student ratings and frequency-extracted keyword summary badges.',
     tag: 'NLP Badges',
-    icon: '💬',
+    icon: <MessageSquare className="w-6 h-6 text-forest" />,
   },
 ];
 
@@ -309,13 +326,13 @@ const Landing = () => {
           {/* Bottom Feature Tags */}
           <div className="pt-4 flex flex-wrap items-center gap-3 text-xs font-semibold text-ink/70">
             <span className="px-3 py-1.5 rounded-full bg-paper border border-ink/10 flex items-center gap-1.5 shadow-soft">
-              <span className="text-turmeric-dark">👤</span> Real-time Student RSVPs
+              <Users className="w-3.5 h-3.5 text-turmeric-dark" /> Real-time Student RSVPs
             </span>
             <span className="px-3 py-1.5 rounded-full bg-paper border border-ink/10 flex items-center gap-1.5 shadow-soft">
-              <span className="text-forest">📈</span> Smart Demand Forecasting
+              <TrendingUp className="w-3.5 h-3.5 text-forest" /> Smart Demand Forecasting
             </span>
             <span className="px-3 py-1.5 rounded-full bg-paper border border-ink/10 flex items-center gap-1.5 shadow-soft">
-              <span className="text-clay">📊</span> Data Driven Kitchen
+              <BarChart3 className="w-3.5 h-3.5 text-clay" /> Data Driven Kitchen
             </span>
           </div>
         </div>
@@ -401,7 +418,9 @@ const Landing = () => {
             <div className="text-2xl text-forest font-serif leading-none">“</div>
             <div>
               <div className="font-display font-bold text-xs text-ink leading-snug">Better planning today saves more than food.</div>
-              <div className="text-[10px] text-forest font-mono mt-1 font-semibold">🌿 Eco Impact</div>
+              <div className="text-[10px] text-forest font-mono mt-1 font-semibold flex items-center gap-1">
+                <Leaf className="w-3 h-3 text-forest" /> Eco Impact
+              </div>
             </div>
           </div>
         </div>
@@ -412,35 +431,35 @@ const Landing = () => {
         <div className="bg-forest rounded-card text-paper p-6 md:p-8 shadow-lift grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 text-center divide-y sm:divide-y-0 sm:divide-x divide-paper/15">
           <div className="pt-2 sm:pt-0">
             <div className="flex items-center justify-center gap-1.5 text-turmeric font-bold text-xl font-display">
-              <span>👥</span> ₹60 / kg
+              <Coins className="w-5 h-5 text-turmeric shrink-0" /> ₹60 / kg
             </div>
             <div className="text-xs text-paper/75 font-mono mt-1">Cost Basis</div>
           </div>
 
           <div className="pt-2 sm:pt-0">
             <div className="flex items-center justify-center gap-1.5 text-paper font-bold text-xl font-display">
-              <span>☁️</span> 2.5 kg
+              <Cloud className="w-5 h-5 text-paper shrink-0" /> 2.5 kg
             </div>
             <div className="text-xs text-paper/75 font-mono mt-1">CO₂e per kg</div>
           </div>
 
           <div className="pt-2 sm:pt-0">
             <div className="flex items-center justify-center gap-1.5 text-turmeric font-bold text-xl font-display">
-              <span>🍲</span> 60 / 40
+              <Utensils className="w-5 h-5 text-turmeric shrink-0" /> 60 / 40
             </div>
             <div className="text-xs text-paper/75 font-mono mt-1">RSVP Blend</div>
           </div>
 
           <div className="pt-2 sm:pt-0">
             <div className="flex items-center justify-center gap-1.5 text-paper font-bold text-xl font-display">
-              <span>👥</span> {students}
+              <Users className="w-5 h-5 text-paper shrink-0" /> {students}
             </div>
             <div className="text-xs text-paper/75 font-mono mt-1">Total Students</div>
           </div>
 
           <div className="col-span-2 sm:col-span-1 pt-2 sm:pt-0">
             <div className="flex items-center justify-center gap-1.5 text-turmeric font-bold text-xl font-display">
-              <span>🌿</span> {stats ? stats.estimatedCarbonKg : 764.7} kg
+              <Leaf className="w-5 h-5 text-turmeric shrink-0" /> {stats ? stats.estimatedCarbonKg : 764.7} kg
             </div>
             <div className="text-xs text-paper/75 font-mono mt-1">CO₂e Saved (Est.)</div>
           </div>

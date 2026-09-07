@@ -4,6 +4,31 @@ import api from '../../api/axios';
 import Loader from '../../components/Loader';
 import StatCard from '../../components/StatCard';
 import PlateGauge from '../../components/PlateGauge';
+import {
+  Sunrise,
+  Sun,
+  Coffee,
+  Moon,
+  Sparkles,
+  ClipboardList,
+  BarChart3,
+  UtensilsCrossed,
+  Star,
+  CheckCircle2,
+  AlertTriangle,
+  AlertCircle,
+  Trash2,
+  Users,
+  Utensils,
+  Lightbulb,
+  Bell,
+  User,
+  Ticket,
+  Target,
+  Lock,
+  CheckCircle,
+  Ban
+} from 'lucide-react';
 
 const MEALS = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -23,10 +48,10 @@ const CUTOFF_TIMINGS = {
 };
 
 const MEAL_ICONS = {
-  Breakfast: '🍳',
-  Lunch: '🍛',
-  Snacks: '☕',
-  Dinner: '🍽️',
+  Breakfast: <Sunrise className="w-4 h-4 text-turmeric-dark shrink-0" />,
+  Lunch: <Sun className="w-4 h-4 text-forest shrink-0" />,
+  Snacks: <Coffee className="w-4 h-4 text-turmeric-dark shrink-0" />,
+  Dinner: <Moon className="w-4 h-4 text-forest-dark shrink-0" />,
 };
 
 const checkMealCutoff = (mealType) => {
@@ -72,11 +97,11 @@ const calculatePrepIntelligence = (liveDemand, aiRecommendedPrep) => {
 };
 
 const tabs = [
-  { id: 'predict', label: "Today's Kitchen Control Room", icon: '🍳' },
-  { id: 'entry', label: 'Log Food Entry / Audit', icon: '📝' },
-  { id: 'waste', label: 'Waste Analytics & Audit', icon: '📊' },
-  { id: 'menu', label: 'Manage Menu', icon: '🍱' },
-  { id: 'feedback', label: 'Student Feedback', icon: '⭐' },
+  { id: 'predict', label: "Today's Kitchen Control Room", icon: <Sparkles className="w-4 h-4 shrink-0" /> },
+  { id: 'entry', label: 'Log Food Entry / Audit', icon: <ClipboardList className="w-4 h-4 shrink-0" /> },
+  { id: 'waste', label: 'Waste Analytics & Audit', icon: <BarChart3 className="w-4 h-4 shrink-0" /> },
+  { id: 'menu', label: 'Manage Menu', icon: <UtensilsCrossed className="w-4 h-4 shrink-0" /> },
+  { id: 'feedback', label: 'Student Feedback', icon: <Star className="w-4 h-4 shrink-0" /> },
 ];
 
 const MessDashboard = () => {
@@ -300,25 +325,25 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                           : 'bg-paper text-ink/60 border-ink/15 hover:border-forest/40'
                       }`}
                     >
-                      {m === mealType ? '★ Active' : 'Select'}
+                      {m === mealType ? 'Active' : 'Select'}
                     </button>
                   </div>
 
                   {/* PREPARATION RISK STATUS BADGE */}
                   <div className="mb-3">
                     {prepIntel.status === 'balanced' && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-forest/10 border border-forest/20 text-forest text-[10px] font-mono font-bold">
-                        🟢 Balanced Demand
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-forest/10 border border-forest/20 text-forest text-[10px] font-mono font-bold">
+                        <CheckCircle2 className="w-3 h-3 shrink-0" /> Balanced Demand
                       </span>
                     )}
                     {prepIntel.status === 'overprep_risk' && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-turmeric/15 border border-turmeric/30 text-turmeric-dark text-[10px] font-mono font-bold">
-                        🟡 Slight Over-prep Risk
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-turmeric/15 border border-turmeric/30 text-turmeric-dark text-[10px] font-mono font-bold">
+                        <AlertTriangle className="w-3 h-3 shrink-0" /> Slight Over-prep Risk
                       </span>
                     )}
                     {prepIntel.status === 'underprep_risk' && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-clay/15 border border-clay/30 text-clay text-[10px] font-mono font-bold">
-                        🔴 Under-prep Risk
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-clay/15 border border-clay/30 text-clay text-[10px] font-mono font-bold">
+                        <AlertCircle className="w-3 h-3 shrink-0" /> Under-prep Risk
                       </span>
                     )}
                   </div>
@@ -331,8 +356,10 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
 
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-ink/60">Skipped / Visitors</span>
-                      <span className="font-mono text-[11px]">
-                        🚫 {studentSkipped} | 🎟️ {visitorPasses}
+                      <span className="font-mono text-[11px] flex items-center gap-1.5">
+                        <span className="inline-flex items-center gap-1 text-clay"><Ban className="w-3 h-3" /> {studentSkipped}</span>
+                        <span className="text-ink/30">|</span>
+                        <span className="inline-flex items-center gap-1 text-turmeric-dark"><Ticket className="w-3 h-3" /> {visitorPasses}</span>
                       </span>
                     </div>
 
@@ -348,7 +375,9 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
 
                     {/* PROMINENT FINAL PREPARATION TARGET */}
                     <div className="bg-forest text-paper p-2.5 rounded-lg border border-forest-dark flex items-center justify-between mt-2 shadow-soft">
-                      <span className="text-[10px] font-mono font-bold uppercase">⭐ PREPARE TARGET</span>
+                      <span className="text-[10px] font-mono font-bold uppercase flex items-center gap-1">
+                        <Target className="w-3.5 h-3.5" /> PREPARE TARGET
+                      </span>
                       <span className="font-display font-bold text-lg leading-none">{prepIntel.target} Meals</span>
                     </div>
                   </div>
@@ -356,8 +385,8 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
 
                 <div className="space-y-2 pt-2 border-t border-ink/10">
                   <div className="flex items-center justify-between text-[11px] font-mono">
-                    <span className={isClosed ? 'text-clay font-bold' : 'text-forest font-semibold'}>
-                      {isClosed ? '🔒 Skip Closed' : '🟢 Skip Open'}
+                    <span className={isClosed ? 'text-clay font-bold flex items-center gap-1' : 'text-forest font-semibold flex items-center gap-1'}>
+                      {isClosed ? <><Lock className="w-3 h-3" /> Skip Closed</> : <><CheckCircle className="w-3 h-3" /> Skip Open</>}
                     </span>
                     <span className="text-[10px] text-ink/40">Cutoff: {CUTOFF_TIMINGS[m]}</span>
                   </div>
@@ -373,9 +402,10 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                         aiRecommendedPrep: mealAIPrep,
                       })
                     }
-                    className="w-full py-1.5 rounded-lg bg-turmeric/15 hover:bg-turmeric text-turmeric-dark hover:text-ink font-mono text-[11px] font-bold transition-all border border-turmeric/30 flex items-center justify-center gap-1 cursor-pointer"
+                    className="w-full py-1.5 rounded-lg bg-turmeric/15 hover:bg-turmeric text-turmeric-dark hover:text-ink font-mono text-[11px] font-bold transition-all border border-turmeric/30 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <span>📝 Close &amp; Audit Meal →</span>
+                    <ClipboardList className="w-3.5 h-3.5" />
+                    <span>Close &amp; Audit Meal →</span>
                   </button>
                 </div>
               </div>
@@ -389,7 +419,8 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-ink/10 pb-4">
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase text-turmeric-dark bg-turmeric/10 px-2.5 py-0.5 rounded-full border border-turmeric/20">
-              <span>🤖 AI Demand Intelligence</span>
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>AI Demand Intelligence</span>
             </div>
             <h3 className="font-display text-2xl font-bold text-ink mt-1">
               {mealType} Preparation &amp; Consumption Forecast
@@ -401,13 +432,13 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
               <button
                 key={m}
                 onClick={() => setMealType(m)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                   mealType === m
                     ? 'bg-turmeric text-ink font-bold shadow-soft'
                     : 'bg-paper text-ink/60 border border-ink/15 hover:border-turmeric/40'
                 }`}
               >
-                {MEAL_ICONS[m]} {m}
+                {MEAL_ICONS[m]} <span>{m}</span>
               </button>
             ))}
           </div>
@@ -432,7 +463,9 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
 
               <div className="md:col-span-2 grid sm:grid-cols-2 gap-4">
                 <div className="rounded-card border border-forest/30 p-4 bg-forest/5 shadow-soft">
-                  <div className="text-[10px] font-mono uppercase font-bold text-forest tracking-wider">⭐ RECOMMENDED FOOD</div>
+                  <div className="text-[10px] font-mono uppercase font-bold text-forest tracking-wider flex items-center gap-1">
+                    <Target className="w-3.5 h-3.5" /> RECOMMENDED FOOD
+                  </div>
                   <div className="font-display font-bold text-2xl text-forest mt-1">
                     {prediction.food_required_kg || prediction.recommendedPreparation || '—'} kg
                   </div>
@@ -440,7 +473,9 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                 </div>
 
                 <div className="rounded-card border border-turmeric/30 p-4 bg-turmeric/5 shadow-soft">
-                  <div className="text-[10px] font-mono uppercase font-bold text-turmeric-dark tracking-wider">👥 EXPECTED ATTENDANCE</div>
+                  <div className="text-[10px] font-mono uppercase font-bold text-turmeric-dark tracking-wider flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5" /> EXPECTED ATTENDANCE
+                  </div>
                   <div className="font-display font-bold text-xl text-ink mt-1">
                     {prediction.expected_student_attendance ?? currentExpectedStudentDiners} students + {prediction.expected_visitor_attendance ?? Math.round(currentVisitorPasses * 0.9)} visitors
                   </div>
@@ -450,7 +485,9 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                 </div>
 
                 <div className="rounded-card border border-clay/30 p-4 bg-clay/5 shadow-soft">
-                  <div className="text-[10px] font-mono uppercase font-bold text-clay tracking-wider">🗑️ ESTIMATED WASTE</div>
+                  <div className="text-[10px] font-mono uppercase font-bold text-clay tracking-wider flex items-center gap-1">
+                    <Trash2 className="w-3.5 h-3.5" /> ESTIMATED WASTE
+                  </div>
                   <div className="font-display font-bold text-2xl text-clay mt-1">
                     {prediction.estimated_waste_kg !== undefined ? prediction.estimated_waste_kg : prediction.predictedWasteKg} kg
                   </div>
@@ -460,7 +497,9 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                 </div>
 
                 <div className="rounded-card border border-sage/30 p-4 bg-sage/10 shadow-soft">
-                  <div className="text-[10px] font-mono uppercase font-bold text-forest tracking-wider">🍽️ ESTIMATED CONSUMPTION</div>
+                  <div className="text-[10px] font-mono uppercase font-bold text-forest tracking-wider flex items-center gap-1">
+                    <Utensils className="w-3.5 h-3.5" /> ESTIMATED CONSUMPTION
+                  </div>
                   <div className="font-display font-bold text-2xl text-ink mt-1">
                     {prediction.estimated_consumption_kg !== undefined ? prediction.estimated_consumption_kg : prediction.predictedConsumption} kg
                   </div>
@@ -475,7 +514,7 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
             <div className="bg-paper rounded-2xl border-2 border-forest p-6 shadow-soft space-y-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-ink/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">⭐</span>
+                  <Target className="w-5 h-5 text-forest" />
                   <div>
                     <h4 className="font-display font-bold text-lg text-ink">
                       FINAL PREPARATION TARGET DECISION FOR {mealType.toUpperCase()}
@@ -517,7 +556,7 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
 
               {/* MANAGER KITCHEN INSIGHT BOX */}
               <div className="bg-turmeric/10 border border-turmeric/30 rounded-xl p-3.5 flex items-start gap-3 text-xs">
-                <span className="text-lg">💡</span>
+                <Lightbulb className="w-5 h-5 text-turmeric-dark shrink-0 mt-0.5" />
                 <div>
                   <strong className="font-bold text-ink block mb-0.5">Kitchen Manager Intelligence Insight:</strong>
                   <span className="text-ink/80">{currentPrepIntel.insight}</span>
@@ -534,7 +573,7 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
         <div className="bg-cardcream rounded-card border border-ink/10 p-6 space-y-4 shadow-soft">
           <div className="flex items-center justify-between border-b border-ink/10 pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-lg">🔔</span>
+              <Bell className="w-5 h-5 text-forest" />
               <h3 className="font-display font-bold text-base text-ink">Live Kitchen Activity Feed</h3>
             </div>
             <span className="text-[10px] font-mono text-forest font-semibold bg-forest/10 px-2.5 py-0.5 rounded-full">
@@ -556,8 +595,9 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                   </div>
 
                   {n.senderStudent && (
-                    <div className="text-[11px] font-mono text-turmeric-dark font-semibold">
-                      👤 {n.senderStudent.name} (Room {n.senderStudent.roomNumber || '101'})
+                    <div className="text-[11px] font-mono text-turmeric-dark font-semibold flex items-center gap-1">
+                      <User className="w-3.5 h-3.5 shrink-0" />
+                      <span>{n.senderStudent.name} (Room {n.senderStudent.roomNumber || '101'})</span>
                     </div>
                   )}
 
@@ -572,7 +612,7 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
         <div className="bg-cardcream rounded-card border border-ink/10 p-6 space-y-4 shadow-soft">
           <div className="flex items-center justify-between border-b border-ink/10 pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-lg">🎟️</span>
+              <Ticket className="w-5 h-5 text-turmeric-dark" />
               <h3 className="font-display font-bold text-base text-ink">Today's Visitor Pass Summary</h3>
             </div>
             <span className="text-xs font-mono font-bold text-forest bg-forest/10 px-3 py-1 rounded-full border border-forest/20">
@@ -588,11 +628,12 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
               return (
                 <div key={m} className="bg-paper rounded-xl border border-ink/10 p-3.5 text-xs space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-display font-bold text-ink">{MEAL_ICONS[m]} {m}</span>
+                    <span className="font-display font-bold text-ink flex items-center gap-1.5">{MEAL_ICONS[m]} {m}</span>
                     <span className="font-mono font-bold text-forest">₹{rev}</span>
                   </div>
-                  <div className="text-[11px] font-mono text-ink/60">
-                    🎟️ {passes} {passes === 1 ? 'pass' : 'passes'} issued
+                  <div className="text-[11px] font-mono text-ink/60 flex items-center gap-1">
+                    <Ticket className="w-3 h-3 text-turmeric-dark shrink-0" />
+                    <span>{passes} {passes === 1 ? 'pass' : 'passes'} issued</span>
                   </div>
                 </div>
               );
@@ -659,8 +700,8 @@ const FoodEntryForm = ({ prefill, onClearPrefill }) => {
           <p className="text-xs text-ink/65">Record actual prepared, consumed, and wasted food to complete meal audit.</p>
         </div>
         {prefill && (
-          <span className="text-xs font-mono bg-forest/10 text-forest border border-forest/20 px-3 py-1 rounded-full font-bold">
-            ✓ Auto-Prefilled
+          <span className="text-xs font-mono bg-forest/10 text-forest border border-forest/20 px-3 py-1 rounded-full font-bold inline-flex items-center gap-1">
+            <CheckCircle2 className="w-3.5 h-3.5" /> Auto-Prefilled
           </span>
         )}
       </div>
@@ -668,7 +709,9 @@ const FoodEntryForm = ({ prefill, onClearPrefill }) => {
       {/* PLANNING TARGET CONTEXT CARD */}
       {(form.targetPreparation || form.expectedDiners || form.aiRecommendedPrep) && (
         <div className="bg-paper rounded-2xl border border-forest/20 p-4 text-xs font-mono space-y-2">
-          <div className="font-bold text-forest uppercase text-[10px]">🎯 PLANNING TARGET CONTEXT FOR AUDIT</div>
+          <div className="font-bold text-forest uppercase text-[10px] flex items-center gap-1">
+            <Target className="w-3.5 h-3.5" /> PLANNING TARGET CONTEXT FOR AUDIT
+          </div>
           <div className="grid grid-cols-3 gap-2 text-center pt-1">
             <div className="bg-cardcream p-2 rounded-lg border border-ink/10">
               <div className="text-[9px] text-ink/50 uppercase font-bold">Expected Diners</div>
@@ -790,7 +833,7 @@ const FoodEntryForm = ({ prefill, onClearPrefill }) => {
         Save &amp; Complete Meal Audit →
       </button>
 
-      {status === 'success' && <p className="text-xs text-forest font-semibold text-center bg-forest/10 p-3 rounded-xl">✓ Meal audit saved successfully!</p>}
+      {status === 'success' && <p className="text-xs text-forest font-semibold text-center bg-forest/10 p-3 rounded-xl flex items-center justify-center gap-1.5"><CheckCircle2 className="w-4 h-4" /> Meal audit saved successfully!</p>}
       {status && status !== 'success' && <p className="text-xs text-clay font-semibold text-center bg-clay/10 p-3 rounded-xl">{status}</p>}
     </form>
   );
@@ -1021,7 +1064,7 @@ const ManageMenu = () => {
           <button className="w-full py-3 rounded-full bg-forest text-paper font-semibold hover:bg-forest-dark transition-colors shadow-soft text-sm cursor-pointer">
             Save Slot →
           </button>
-          {status === 'success' && <p className="text-xs text-forest font-semibold text-center bg-forest/10 p-2 rounded-lg">✓ Menu slot saved!</p>}
+          {status === 'success' && <p className="text-xs text-forest font-semibold text-center bg-forest/10 p-2 rounded-lg flex items-center justify-center gap-1.5"><CheckCircle2 className="w-4 h-4" /> Menu slot saved!</p>}
         </form>
 
         <div className="space-y-2.5 max-h-[440px] overflow-y-auto scrollbar-thin pr-1">
@@ -1045,17 +1088,35 @@ const ManageMenu = () => {
 /* 5. FEEDBACK SUMMARY COMPONENT */
 const FeedbackSummary = () => {
   const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const loadFeedback = () => {
+    setLoading(true);
+    api.get('/analytics/feedback')
+      .then((res) => setSummary(res.data))
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
-    api.get('/analytics/feedback').then((res) => setSummary(res.data));
+    loadFeedback();
   }, []);
 
-  if (!summary) return <Loader label="Summarizing student feedback..." />;
+  if (loading || !summary) return <Loader label="Summarizing student feedback..." />;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl font-bold text-ink">STUDENT FEEDBACK &amp; SENTIMENT</h2>
-        <p className="text-xs text-ink/65">Aggregated student ratings and common comment keywords.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-2xl font-bold text-ink">STUDENT FEEDBACK &amp; SENTIMENT</h2>
+          <p className="text-xs text-ink/65">Live student ratings, kitchen satisfaction scores, and feedback keywords.</p>
+        </div>
+        <button
+          onClick={loadFeedback}
+          className="px-4 py-2 rounded-full bg-forest text-paper text-xs font-semibold hover:bg-forest-dark transition-colors cursor-pointer self-start"
+        >
+          Refresh Feedbacks
+        </button>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1066,26 +1127,78 @@ const FeedbackSummary = () => {
       </div>
 
       <div className="bg-cardcream rounded-card border border-ink/10 p-6 shadow-soft space-y-3">
-        <h3 className="font-display text-lg font-bold text-ink">Most Mentioned Keywords</h3>
-        <div className="flex flex-wrap gap-2">
-          {summary.topKeywords.map((k) => (
-            <span key={k.word} className="px-3.5 py-1.5 rounded-full bg-turmeric/15 text-turmeric-dark text-xs font-semibold border border-turmeric/30">
-              {k.word} <span className="text-ink/40 font-mono">×{k.count}</span>
-            </span>
-          ))}
-        </div>
+        <h3 className="font-display text-lg font-bold text-ink flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-turmeric-dark" />
+          <span>Most Mentioned Feedback Keywords</span>
+        </h3>
+        {summary.topKeywords && summary.topKeywords.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {summary.topKeywords.map((k) => (
+              <span key={k.word} className="px-3.5 py-1.5 rounded-full bg-turmeric/15 text-turmeric-dark text-xs font-semibold border border-turmeric/30 flex items-center gap-1.5">
+                <span>{k.word}</span>
+                <span className="text-ink/50 font-mono text-[10px] bg-paper px-1.5 py-0.5 rounded-full">×{k.count}</span>
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-ink/50 font-mono">No sentiment keywords extracted yet.</p>
+        )}
       </div>
 
-      <div className="bg-cardcream rounded-card border border-ink/10 p-6 shadow-soft space-y-3">
-        <h3 className="font-display text-lg font-bold text-ink">Recent Student Comments</h3>
-        <div className="space-y-2.5 max-h-72 overflow-y-auto scrollbar-thin pr-1">
-          {summary.recent.map((f) => (
-            <div key={f._id} className="text-xs border-b border-ink/10 pb-2.5">
-              <span className="font-bold text-ink">{f.user?.name || 'Student'}</span> on <strong className="text-forest">{f.mealType}</strong>:{' '}
-              <span className="text-ink/80 italic">"{f.comment || 'No comment provided.'}"</span>
-            </div>
-          ))}
+      <div className="bg-cardcream rounded-card border border-ink/10 p-6 shadow-soft space-y-4">
+        <div className="flex items-center justify-between border-b border-ink/10 pb-3">
+          <h3 className="font-display text-lg font-bold text-ink flex items-center gap-2">
+            <Star className="w-4 h-4 text-forest" />
+            <span>Recent Student Reviews &amp; Suggestions</span>
+          </h3>
+          <span className="text-xs font-mono text-ink/50">{summary.recent?.length || 0} reviews</span>
         </div>
+
+        {summary.recent && summary.recent.length > 0 ? (
+          <div className="space-y-3 max-h-[500px] overflow-y-auto scrollbar-thin pr-1">
+            {summary.recent.map((f) => (
+              <div key={f._id} className="bg-paper p-4 rounded-2xl border border-ink/10 shadow-soft space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-ink text-xs">{f.user?.name || 'Student'}</span>
+                    {f.user?.hostelBlock && (
+                      <span className="text-[10px] font-mono text-ink/60 bg-cardcream px-2 py-0.5 rounded border border-ink/10">
+                        Block {f.user.hostelBlock} · Room {f.user.roomNumber || '—'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono bg-forest/10 text-forest px-2 py-0.5 rounded-full font-bold">
+                      {f.mealType}
+                    </span>
+                    <span className="text-[10px] font-mono text-ink/40">
+                      {new Date(f.createdAt || f.date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 text-[11px] font-mono text-ink/70 bg-cardcream/50 px-3 py-1.5 rounded-xl border border-ink/5">
+                  <span className="flex items-center gap-1">Taste: <strong className="text-turmeric-dark font-bold">{f.tasteRating}★</strong></span>
+                  <span className="text-ink/20">|</span>
+                  <span className="flex items-center gap-1">Hygiene: <strong className="text-forest font-bold">{f.cleanlinessRating}★</strong></span>
+                  <span className="text-ink/20">|</span>
+                  <span className="flex items-center gap-1">Service: <strong className="text-forest font-bold">{f.serviceRating}★</strong></span>
+                </div>
+
+                {f.comment ? (
+                  <p className="text-xs text-ink/80 italic pl-1 font-body">"{f.comment}"</p>
+                ) : (
+                  <p className="text-[11px] text-ink/40 italic pl-1">No additional comment</p>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-ink/50 font-mono py-4 text-center">No student reviews received yet.</p>
+        )}
       </div>
     </div>
   );
