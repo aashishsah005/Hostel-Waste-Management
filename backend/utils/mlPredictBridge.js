@@ -110,7 +110,7 @@ async function getMealPrediction({ dateStr, mealType, overrides = {} }) {
     visitorBookings = visitorAgg[0]?.total || 0;
   }
 
-  const visitorAttendanceRate = overrides.visitor_attendance_rate || 0.90;
+  const visitorAttendanceRate = overrides.visitor_attendance_rate !== undefined ? Number(overrides.visitor_attendance_rate) : 1.0;
   const expectedVisitorAttendance = overrides.expected_visitor_attendance !== undefined
     ? Number(overrides.expected_visitor_attendance)
     : Math.round(visitorBookings * visitorAttendanceRate);

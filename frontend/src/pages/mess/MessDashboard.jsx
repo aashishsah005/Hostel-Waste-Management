@@ -242,8 +242,9 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
   const currentExpectedStudentDiners = Math.max(0, totalActiveStudents - currentStudentSkipped);
   const currentFinalDemand = currentExpectedStudentDiners + currentVisitorPasses;
 
-  const currentAIRecommended = prediction?.recommendedPreparation || currentFinalDemand || 1;
-  const currentPrepIntel = calculatePrepIntelligence(currentFinalDemand, currentAIRecommended);
+  const currentAIFoodKg = prediction?.food_required_kg || prediction?.recommendedPreparation || (currentFinalDemand ? +(currentFinalDemand * 0.42).toFixed(2) : 1);
+  const currentAIDiners = prediction?.expected_total_attendance || currentFinalDemand;
+  const currentPrepIntel = calculatePrepIntelligence(currentFinalDemand, currentAIDiners, currentAIFoodKg);
 
   // Waste % calculation safely
   const predConsumption = prediction?.predictedConsumption || 1;
@@ -304,8 +305,10 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
             const expectedStudentDiners = Math.max(0, totalActiveStudents - studentSkipped);
             const finalKitchenDemand = expectedStudentDiners + visitorPasses;
 
-            const mealAIPrep = allPredictions[m]?.recommendedPreparation || finalKitchenDemand || 1;
-            const prepIntel = calculatePrepIntelligence(finalKitchenDemand, mealAIPrep);
+            const mealPred = allPredictions[m];
+            const mealAIFoodKg = mealPred?.food_required_kg || mealPred?.recommendedPreparation || (finalKitchenDemand ? +(finalKitchenDemand * 0.42).toFixed(2) : 1);
+            const mealAIDiners = mealPred?.expected_total_attendance || finalKitchenDemand;
+            const prepIntel = calculatePrepIntelligence(finalKitchenDemand, mealAIDiners, mealAIFoodKg);
             const isClosed = checkMealCutoff(m);
 
             return (
@@ -372,12 +375,12 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
 
                     <div className="flex items-center justify-between text-xs border-t border-ink/10 pt-1.5">
                       <span className="text-ink/60">Live Demand</span>
-                      <span className="font-bold text-forest">{finalKitchenDemand}</span>
+                      <span className="font-bold text-forest">{finalKitchenDemand} Diners</span>
                     </div>
 
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-ink/60">AI Rec. Prep</span>
-                      <span className="font-bold text-turmeric-dark">{mealAIPrep}</span>
+                      <span className="text-ink/60">AI Rec. Food</span>
+                      <span className="font-bold text-turmeric-dark">{mealAIFoodKg} kg</span>
                     </div>
 
                     {/* PROMINENT FINAL PREPARATION TARGET */}
@@ -385,7 +388,10 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                       <span className="text-[10px] font-mono font-bold uppercase flex items-center gap-1">
                         <Target className="w-3.5 h-3.5" /> PREPARE TARGET
                       </span>
-                      <span className="font-display font-bold text-lg leading-none">{prepIntel.target} Meals</span>
+                      <div className="text-right">
+                        <span className="font-display font-bold text-lg leading-none block">{prepIntel.target} Meals</span>
+                        <span className="text-[9px] font-mono text-paper/75 block mt-0.5">~{mealAIFoodKg} kg food</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -484,7 +490,7 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                     <Users className="w-3.5 h-3.5" /> EXPECTED ATTENDANCE
                   </div>
                   <div className="font-display font-bold text-xl text-ink mt-1">
-                    {prediction.expected_student_attendance ?? currentExpectedStudentDiners} students + {prediction.expected_visitor_attendance ?? Math.round(currentVisitorPasses * 0.9)} visitors
+                    {prediction.expected_student_attendance ?? currentExpectedStudentDiners} students + {prediction.expected_visitor_attendance ?? currentVisitorPasses} visitors
                   </div>
                   <div className="text-[11px] text-ink/70 font-mono mt-0.5">
                     Total Expected Diners: <span className="font-bold text-ink">{prediction.expected_total_attendance ?? currentFinalDemand}</span>
@@ -537,6 +543,7 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                   <div className="font-display font-bold text-2xl leading-none mt-0.5">
                     {currentPrepIntel.target} Meals
                   </div>
+                  <div className="text-[10px] font-mono text-paper/80 mt-0.5">~{currentAIFoodKg} kg</div>
                 </div>
               </div>
 
@@ -548,9 +555,9 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                 </div>
 
                 <div className="bg-turmeric/5 p-3 rounded-xl border border-turmeric/20">
-                  <div className="text-[10px] uppercase font-bold text-turmeric-dark">2. AI REC. PREPARATION</div>
-                  <div className="font-display text-xl font-bold text-ink mt-1">{currentAIRecommended} Meals</div>
-                  <div className="text-[10px] text-ink/60 mt-0.5">Weighted 30d trend + 5% buffer</div>
+                  <div className="text-[10px] uppercase font-bold text-turmeric-dark">2. AI REC. FOOD FORECAST</div>
+                  <div className="font-display text-xl font-bold text-ink mt-1">{currentAIFoodKg} kg</div>
+                  <div className="text-[10px] text-ink/60 mt-0.5">Model attendance baseline: ~{currentAIDiners} diners</div>
                 </div>
 
                 <div className="bg-sage/10 p-3 rounded-xl border border-sage/20">
