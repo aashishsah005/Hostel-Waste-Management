@@ -1,5 +1,6 @@
 const FoodEntry = require('../models/FoodEntry');
 const { predictFromHistory } = require('../utils/predictDemand');
+const { getMealPrediction } = require('../utils/mlPredictBridge');
 
 const createFoodEntry = async (req, res, next) => {
   try {
@@ -75,15 +76,33 @@ const updateFoodEntry = async (req, res, next) => {
   }
 };
 
-// Predict demand for a given mealType using the last N entries of the same mealType
+// Predict demand for a given mealType using trained ML models
 const predictDemand = async (req, res, next) => {
   try {
-    const { mealType, upcomingBookings } = req.query;
+    const { mealType, date, upcomingBookings } = req.query;
     if (!mealType) return res.status(400).json({ message: 'mealType query param is required' });
 
-    const history = await FoodEntry.find({ mealType }).sort({ date: 1 }).limit(30);
-    const prediction = predictFromHistory(history, Number(upcomingBookings) || undefined);
-    res.json({ mealType, ...prediction });
+    try {
+      const mlPrediction = await getMealPrediction({
+        dateStr: date || new Date().toISOString().slice(0, 10),
+        mealType,
+        overrides: req.query,
+      });
+
+      return res.json({
+        mealType,
+        ...mlPrediction,
+        recommendedPreparation: mlPrediction.food_required_kg,
+        predictedConsumption: mlPrediction.estimated_consumption_kg,
+        predictedWasteKg: mlPrediction.estimated_waste_kg,
+        method: 'scikit-learn-ml-pipeline',
+      });
+    } catch (mlErr) {
+      console.warn('ML Prediction fallback to moving average:', mlErr.message);
+      const history = await FoodEntry.find({ mealType }).sort({ date: 1 }).limit(30);
+      const prediction = predictFromHistory(history, Number(upcomingBookings) || undefined);
+      return res.json({ mealType, ...prediction });
+    }
   } catch (err) {
     next(err);
   }

@@ -32,6 +32,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/vacations', require('./routes/vacationRoutes'));
+app.use('/api/predict-food', require('./routes/predictRoutes'));
 
 app.use(notFound);
 app.use(errorHandler);

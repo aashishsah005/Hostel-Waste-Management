@@ -431,30 +431,43 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
               </div>
 
               <div className="md:col-span-2 grid sm:grid-cols-2 gap-4">
-                <StatCard
-                  label="Predicted Consumption"
-                  value={prediction.predictedConsumption}
-                  sublabel={prediction.method}
-                  accent="forest"
-                />
-                <StatCard
-                  label="AI Recommended Prep (incl. 5% buffer)"
-                  value={prediction.recommendedPreparation ?? '—'}
-                  sublabel="Historical ML Forecast"
-                  accent="sage"
-                />
-                <StatCard
-                  label="Predicted Waste (kg)"
-                  value={`${prediction.predictedWasteKg} kg`}
-                  sublabel={`~${wastePercent}% waste ratio`}
-                  accent="clay"
-                />
-                <StatCard
-                  label="Model Confidence"
-                  value={prediction.confidence || 'High'}
-                  sublabel={`Sample: ${prediction.sampleSize ?? 30} entries`}
-                  accent="turmeric"
-                />
+                <div className="rounded-card border border-forest/30 p-4 bg-forest/5 shadow-soft">
+                  <div className="text-[10px] font-mono uppercase font-bold text-forest tracking-wider">⭐ RECOMMENDED FOOD</div>
+                  <div className="font-display font-bold text-2xl text-forest mt-1">
+                    {prediction.food_required_kg || prediction.recommendedPreparation || '—'} kg
+                  </div>
+                  <div className="text-[11px] text-ink/60 font-mono mt-0.5">Scikit-learn Regressor Model</div>
+                </div>
+
+                <div className="rounded-card border border-turmeric/30 p-4 bg-turmeric/5 shadow-soft">
+                  <div className="text-[10px] font-mono uppercase font-bold text-turmeric-dark tracking-wider">👥 EXPECTED ATTENDANCE</div>
+                  <div className="font-display font-bold text-xl text-ink mt-1">
+                    {prediction.expected_student_attendance ?? currentExpectedStudentDiners} students + {prediction.expected_visitor_attendance ?? Math.round(currentVisitorPasses * 0.9)} visitors
+                  </div>
+                  <div className="text-[11px] text-ink/70 font-mono mt-0.5">
+                    Total Expected Diners: <span className="font-bold text-ink">{prediction.expected_total_attendance ?? currentFinalDemand}</span>
+                  </div>
+                </div>
+
+                <div className="rounded-card border border-clay/30 p-4 bg-clay/5 shadow-soft">
+                  <div className="text-[10px] font-mono uppercase font-bold text-clay tracking-wider">🗑️ ESTIMATED WASTE</div>
+                  <div className="font-display font-bold text-2xl text-clay mt-1">
+                    {prediction.estimated_waste_kg !== undefined ? prediction.estimated_waste_kg : prediction.predictedWasteKg} kg
+                  </div>
+                  <div className="text-[11px] text-clay/80 font-mono mt-0.5 font-semibold">
+                    Waste Rate: {prediction.estimated_waste_percentage !== undefined ? prediction.estimated_waste_percentage : wastePercent}%
+                  </div>
+                </div>
+
+                <div className="rounded-card border border-sage/30 p-4 bg-sage/10 shadow-soft">
+                  <div className="text-[10px] font-mono uppercase font-bold text-forest tracking-wider">🍽️ ESTIMATED CONSUMPTION</div>
+                  <div className="font-display font-bold text-2xl text-ink mt-1">
+                    {prediction.estimated_consumption_kg !== undefined ? prediction.estimated_consumption_kg : prediction.predictedConsumption} kg
+                  </div>
+                  <div className="text-[11px] text-ink/60 font-mono mt-0.5">
+                    Visitor Bookings: <span className="font-bold text-forest">{prediction.visitor_bookings ?? currentVisitorPasses} seats</span>
+                  </div>
+                </div>
               </div>
             </div>
 
