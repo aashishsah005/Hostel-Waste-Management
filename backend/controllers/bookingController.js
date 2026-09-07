@@ -286,7 +286,6 @@ const bookVisitorMeal = async (req, res, next) => {
         transactionId,
         paidAt: booking.paidAt,
         tokenCode,
-        tokenCodes,
       },
     });
   } catch (err) {

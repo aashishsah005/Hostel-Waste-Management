@@ -1323,8 +1323,6 @@ const VisitorEntry = () => {
       const dateObj = new Date(b.date);
       const dateDisplay = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-      const allTokens = b.tokenCodes && b.tokenCodes.length > 0 ? b.tokenCodes : [b.tokenCode];
-
       setReceipt({
         tokenCode: b.tokenCode,
         quantity: b.quantity || quantity,
