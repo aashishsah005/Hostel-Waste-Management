@@ -87,16 +87,27 @@ async function getMealPrediction({ dateStr, mealType, overrides = {} }) {
     ? Number(overrides.expected_student_attendance)
     : Math.max(0, totalStudents - studentSkips);
 
-  // 3. Count Confirmed Paid Visitor Bookings for this meal
+  // 3. Count Confirmed Paid Visitor Bookings for this meal (sum of tokens/guests)
   let visitorBookings = overrides.visitor_bookings;
   if (visitorBookings === undefined || visitorBookings === null) {
-    visitorBookings = await Booking.countDocuments({
-      date: { $gte: start, $lte: end },
-      mealType,
-      isVisitorPass: true,
-      paymentStatus: 'paid',
-      status: { $ne: 'cancelled' },
-    });
+    const visitorAgg = await Booking.aggregate([
+      {
+        $match: {
+          date: { $gte: start, $lte: end },
+          mealType,
+          isVisitorPass: true,
+          paymentStatus: 'paid',
+          status: { $ne: 'cancelled' },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: { $ifNull: ['$quantity', 1] } },
+        },
+      },
+    ]);
+    visitorBookings = visitorAgg[0]?.total || 0;
   }
 
   const visitorAttendanceRate = overrides.visitor_attendance_rate || 0.90;

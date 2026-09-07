@@ -67,33 +67,40 @@ const checkMealCutoff = (mealType) => {
 };
 
 // Preparation Intelligence calculation rule
-const calculatePrepIntelligence = (liveDemand, aiRecommendedPrep) => {
-  const recommended = aiRecommendedPrep || liveDemand || 1;
+const calculatePrepIntelligence = (liveDemand, aiExpectedDiners, aiFoodRequiredKg) => {
   const live = liveDemand || 0;
+  const aiDiners = aiExpectedDiners || live || 1;
+  const foodKg = aiFoodRequiredKg || (live * 0.42);
 
-  let target = Math.max(live, recommended);
+  let target = Math.max(live, aiDiners);
   let status = 'balanced'; // 'balanced' | 'overprep_risk' | 'underprep_risk'
   let rationale = '';
   let insight = '';
 
-  if (live > recommended) {
+  const diff = live - aiDiners;
+  if (diff > Math.max(15, aiDiners * 0.08)) {
     status = 'underprep_risk';
     target = live;
-    rationale = 'Live demand exceeds AI recommendation. Target increased to cover expected diners & visitors.';
-    insight = 'Live student demand & visitor passes exceed historical AI forecast. Prepare according to live demand to prevent shortages.';
-  } else if (recommended - live > Math.max(10, live * 0.1)) {
+    rationale = `Live demand (${live} diners) exceeds AI baseline (${aiDiners} diners). Prepare full live demand (${live} meals / ~${foodKg} kg) to prevent meal shortages.`;
+    insight = 'Live student attendance and guest bookings exceed historical baseline. Ensure full batching to prevent shortages.';
+  } else if (aiDiners - live > Math.max(20, live * 0.10)) {
     status = 'overprep_risk';
-    target = recommended;
-    rationale = 'AI recommendation includes safety buffer and exceeds live demand. Target set to AI recommendation.';
-    insight = 'Current demand is below the AI recommendation. Monitor preparation closely to avoid unnecessary food waste.';
+    target = live;
+    rationale = `Live demand (${live} diners) is noticeably lower than historical baseline (${aiDiners} diners) due to active skips. Target adjusted to ${live} meals.`;
+    insight = 'Significant student skips recorded. Reduce batch sizes to prevent excess food waste at closing audit.';
   } else {
     status = 'balanced';
-    target = recommended;
-    rationale = 'Live demand is well-aligned with AI recommendation. Optimal balanced preparation target.';
-    insight = 'Kitchen demand and AI forecast are nicely balanced. Follow target preparation count for best fulfilment.';
+    target = live;
+    rationale = `Live demand (${live} diners) aligns closely with AI historical forecast (~${aiDiners} diners / ${foodKg} kg). High-confidence preparation target set.`;
+    insight = 'Kitchen demand is stable and synchronized with student attendance and visitor reservations. Projected waste is minimal (<5%).';
   }
 
-  return { target, status, rationale, insight };
+  return {
+    target,
+    status,
+    rationale,
+    insight,
+  };
 };
 
 const tabs = [
