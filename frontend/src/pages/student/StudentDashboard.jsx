@@ -1282,6 +1282,20 @@ const FeedbackForm = () => {
   );
 };
 
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 /* 4. VISITOR / GUEST TOKEN GENERATOR WITH TOKEN QUANTITY SELECTION */
 const VisitorEntry = () => {
   const [fullName, setFullName] = useState('');
@@ -1294,22 +1308,15 @@ const VisitorEntry = () => {
   const [activeTokenIndex, setActiveTokenIndex] = useState(0);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSimulatorModal, setShowSimulatorModal] = useState(false);
 
-  const priceMap = { Breakfast: 40, Lunch: 40, Snacks: 20, Dinner: 40 };
+  const priceMap = { Breakfast: 40, Lunch: 40, Dinner: 40 };
   const currentPrice = priceMap[mealType] || 40;
   const totalPrice = currentPrice * quantity;
 
-  const handlePayAndBook = async (e) => {
-    e.preventDefault();
-    if (!fullName || !phone || !date) {
-      setStatus('Please fill in all required fields.');
-      return;
-    }
-
-    setLoading(true);
-    setStatus('');
-
+  const processSuccessfulPayment = async (paymentId) => {
     try {
+      setStatus('Payment verified! Generating QR Pass...');
       const res = await api.post('/bookings/visitor-pay', {
         date,
         mealType,
@@ -1317,6 +1324,8 @@ const VisitorEntry = () => {
         phone,
         purpose,
         quantity,
+        razorpay_payment_id: paymentId,
+        paymentMethod: 'Razorpay',
       });
 
       const b = res.data.booking;
@@ -1338,10 +1347,82 @@ const VisitorEntry = () => {
       });
       setStatus('success');
     } catch (err) {
-      setStatus(err.response?.data?.message || 'Could not complete visitor booking.');
+      setStatus(err.response?.data?.message || 'Could not complete visitor booking after payment.');
     } finally {
       setLoading(false);
+      setShowSimulatorModal(false);
     }
+  };
+
+  const handlePayAndBook = async (e) => {
+    e.preventDefault();
+    if (!fullName || !phone || !date) {
+      setStatus('Please fill in all required fields.');
+      return;
+    }
+
+    setLoading(true);
+    setStatus('');
+
+    const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    const isPlaceholderKey = !razorpayKey || razorpayKey === 'rzp_test_YOUR_KEY_HERE';
+
+    if (isPlaceholderKey) {
+      // Open interactive test simulator modal
+      setShowSimulatorModal(true);
+      return;
+    }
+
+    const isLoaded = await loadRazorpayScript();
+    if (!isLoaded) {
+      setShowSimulatorModal(true);
+      return;
+    }
+
+    const options = {
+      key: razorpayKey,
+      amount: totalPrice * 100, // Amount in paise
+      currency: 'INR',
+      name: 'Hostel Mess System',
+      description: `${mealType} Visitor Pass (${quantity} ${quantity === 1 ? 'Guest' : 'Guests'})`,
+      prefill: {
+        name: fullName,
+        contact: phone,
+      },
+      theme: {
+        color: '#1f3629',
+      },
+      handler: function (response) {
+        processSuccessfulPayment(response.razorpay_payment_id);
+      },
+      modal: {
+        ondismiss: function () {
+          setStatus('Payment cancelled by user. Pass was not generated.');
+          setLoading(false);
+        },
+      },
+    };
+
+    try {
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (errResponse) {
+        setShowSimulatorModal(true);
+      });
+      rzp.open();
+    } catch (err) {
+      setShowSimulatorModal(true);
+    }
+  };
+
+  const handleSimulateSuccess = () => {
+    const dummyPaymentId = `pay_rzp_test_${Date.now()}`;
+    processSuccessfulPayment(dummyPaymentId);
+  };
+
+  const handleSimulateFailure = () => {
+    setStatus('Payment failed or cancelled by user. Pass was not generated.');
+    setLoading(false);
+    setShowSimulatorModal(false);
   };
 
   const handleReset = () => {
@@ -1451,7 +1532,6 @@ const VisitorEntry = () => {
                 >
                   <option value="Breakfast">Breakfast — ₹40</option>
                   <option value="Lunch">Lunch — ₹40</option>
-                  <option value="Snacks">Snacks — ₹20</option>
                   <option value="Dinner">Dinner — ₹40</option>
                 </select>
               </div>
@@ -1632,6 +1712,86 @@ const VisitorEntry = () => {
           )}
         </div>
       </div>
+
+      {/* RAZORPAY GATEWAY TEST MODAL SIMULATOR */}
+      {showSimulatorModal && (
+        <div className="fixed inset-0 z-50 bg-ink/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-paper rounded-2xl border border-ink/20 shadow-lift max-w-md w-full p-6 space-y-5">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-ink/10 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#0c2340] text-[#3399cc] flex items-center justify-center font-bold text-sm shadow-soft">
+                  R
+                </div>
+                <div>
+                  <div className="font-display font-bold text-sm text-ink leading-none">Razorpay Gateway Test Mode</div>
+                  <div className="text-[10px] text-ink/50 font-mono mt-0.5">Hostel Mess Payment Checkout</div>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowSimulatorModal(false);
+                  setLoading(false);
+                  setStatus('Payment cancelled by user. Pass was not generated.');
+                }}
+                className="text-ink/40 hover:text-ink text-sm font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Order Summary */}
+            <div className="bg-cardcream p-4 rounded-xl border border-ink/10 space-y-2 text-xs">
+              <div className="flex justify-between items-center text-ink/70">
+                <span>Visitor Name:</span>
+                <span className="font-bold text-ink">{fullName}</span>
+              </div>
+              <div className="flex justify-between items-center text-ink/70">
+                <span>Meal &amp; Portions:</span>
+                <span className="font-bold text-ink">{mealType} · {quantity} {quantity === 1 ? 'Guest' : 'Guests'}</span>
+              </div>
+              <div className="flex justify-between items-center text-ink/70 pt-2 border-t border-ink/10">
+                <span className="font-mono uppercase font-bold text-ink">Total Amount:</span>
+                <span className="font-display font-bold text-lg text-forest">₹{totalPrice}</span>
+              </div>
+            </div>
+
+            {/* Config Notice */}
+            <div className="bg-turmeric/10 border border-turmeric/30 p-3 rounded-xl text-[11px] text-ink/80 space-y-1">
+              <div className="font-bold text-turmeric-dark flex items-center gap-1">
+                🔑 Razorpay API Key Location:
+              </div>
+              <p className="font-mono text-[10px] bg-paper px-2 py-1 rounded border border-ink/10 text-ink/80">
+                frontend/.env → VITE_RAZORPAY_KEY_ID
+              </p>
+              <p className="text-[10px] text-ink/60">
+                To connect live Razorpay SDK popups, paste your Key ID from Razorpay Dashboard in <code>frontend/.env</code>.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-2 pt-1">
+              <button
+                onClick={handleSimulateSuccess}
+                disabled={loading}
+                className="w-full py-3 bg-forest hover:bg-forest-light text-paper font-bold text-xs rounded-xl shadow-soft transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Simulate Successful Payment (Pay ₹{totalPrice})</span>
+              </button>
+
+              <button
+                onClick={handleSimulateFailure}
+                disabled={loading}
+                className="w-full py-2.5 bg-clay/10 hover:bg-clay/20 text-clay font-bold text-xs rounded-xl border border-clay/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Ban className="w-4 h-4" />
+                <span>Simulate Failed / Cancelled Payment</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -230,10 +230,11 @@ const bookVisitorMeal = async (req, res, next) => {
     const unitPrice = menuItem?.price || fallbackPrices[mealType] || 40;
     const paymentAmount = unitPrice * quantity;
 
-    // Generate unique Dummy Transaction ID & single Token Code
+    // Generate unique Transaction ID & Token Code
     const yyyymmdd = targetDate.toISOString().slice(0, 10).replace(/-/g, '');
     const randTxnSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
-    const transactionId = `TXN-DEMO-${yyyymmdd}-${randTxnSuffix}`;
+    const transactionId = req.body.razorpay_payment_id || req.body.transactionId || `pay_rzp_${yyyymmdd}_${randTxnSuffix}`;
+    const paymentMethod = req.body.paymentMethod || 'Razorpay';
 
     const randTokenSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
     const tokenCode = `VIS-${randTokenSuffix}`;
@@ -250,7 +251,7 @@ const bookVisitorMeal = async (req, res, next) => {
       quantity,
       visitorName,
       tokenCode,
-      paymentMethod: 'dummy',
+      paymentMethod,
       transactionId,
       paidAt: new Date(),
       phone,
