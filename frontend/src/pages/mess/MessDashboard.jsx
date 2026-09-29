@@ -246,10 +246,10 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
   const currentAIDiners = prediction?.expected_total_attendance || currentFinalDemand;
   const currentPrepIntel = calculatePrepIntelligence(currentFinalDemand, currentAIDiners, currentAIFoodKg);
 
-  // Waste % calculation safely
-  const predConsumption = prediction?.predictedConsumption || 1;
-  const predWasteKg = prediction?.predictedWasteKg || 0;
-  const wastePercent = Math.min(100, Math.round((predWasteKg / (predConsumption * 0.35 || 1)) * 100));
+  // Waste % calculation safely in plates
+  const predConsumption = prediction?.predictedConsumption || prediction?.estimated_consumption_plates || 1;
+  const predWastePlates = prediction?.predicted_waste_plates ?? prediction?.predictedWastePlates ?? 0;
+  const wastePercent = prediction?.estimated_waste_percentage ?? Math.min(100, Math.round((predWastePlates / (predConsumption || 1)) * 100));
 
   return (
     <div className="space-y-8">

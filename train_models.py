@@ -2,7 +2,7 @@
 Smart Hostel Waste Food Management - ML Model Training Pipeline
 Trains two regression models:
   1. Food Requirement Prediction (Target: quantity_required_kg)
-  2. Food Waste Prediction (Target: waste_kg)
+  2. Food Waste Prediction (Target: wasted_plates)
 
 Dataset: hostel_waste_food_management_final_1000_records.csv
 """
@@ -368,10 +368,6 @@ def main():
         print(f"      Expected Total Diners: {exp_tot} ({s['exp_s']} students + {exp_vis} visitors)")
         print(f"      Recommended Food:       {req_val:.2f} kg")
         print(f"      Predicted Wasted Plates: {waste_plates_val} plates")
-
-    print("\n" + "=" * 70)
-    print(" TRAINING & EVALUATION COMPLETED SUCCESSFULLY ")
-    print("=" * 70)
 
     print("\n" + "=" * 70)
     print(" TRAINING & EVALUATION COMPLETED SUCCESSFULLY ")
