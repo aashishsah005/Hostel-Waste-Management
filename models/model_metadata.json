@@ -45,7 +45,7 @@
   ],
   "model_version": "2.0.0",
   "target_unit": "plates",
-  "training_timestamp": "2026-09-29T23:29:14.886670",
+  "training_timestamp": "2026-09-30T00:18:20.394104",
   "food_requirement_model": {
     "algorithm": "Random Forest",
     "target": "quantity_required_kg",
