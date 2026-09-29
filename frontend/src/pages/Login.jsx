@@ -25,7 +25,7 @@ const Login = () => {
       const user = await login(form.email, form.password);
       navigate(roleHome[user.role] || '/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Server connection failed. Please ensure the backend server (port 5000) is running.');
+      setError(err.response?.data?.message || 'Server connection failed. If using free tier hosting, please wait 30 seconds for backend to wake up and try again.');
     } finally {
       setLoading(false);
     }

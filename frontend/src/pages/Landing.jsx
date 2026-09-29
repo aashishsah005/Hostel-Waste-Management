@@ -273,11 +273,11 @@ const Landing = () => {
       );
   }, []);
 
-  const savedPercent = stats ? stats.savedPercent : 93;
-  const wasteKg = stats ? stats.totalWasteKg : 305.9;
-  const costLost = stats ? stats.estimatedCostLost : 18354;
-  const bookings = stats ? stats.totalBookings : 240;
-  const students = stats ? stats.totalStudents : 150;
+  const savedPercent = stats && stats.savedPercent != null ? stats.savedPercent : 93;
+  const wasteKg = stats && stats.totalWasteKg != null ? stats.totalWasteKg : 305.9;
+  const costLost = stats && stats.estimatedCostLost != null ? stats.estimatedCostLost : 18354;
+  const bookings = stats && stats.totalBookings != null ? stats.totalBookings : 240;
+  const students = stats && stats.totalStudents != null ? stats.totalStudents : 150;
 
   return (
     <div id="home" className="space-y-16 pb-16">
@@ -408,7 +408,7 @@ const Landing = () => {
               ₹
             </div>
             <div>
-              <div className="font-display font-bold text-xl text-forest leading-none">₹{costLost.toLocaleString()}</div>
+              <div className="font-display font-bold text-xl text-forest leading-none">₹{(costLost || 0).toLocaleString()}</div>
               <div className="text-[11px] text-ink/60 font-body mt-1 font-semibold">Cost Lost <span className="text-[10px] block font-mono font-normal text-ink/40">(30d total)</span></div>
             </div>
           </div>
