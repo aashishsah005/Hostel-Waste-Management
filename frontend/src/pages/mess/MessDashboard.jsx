@@ -499,10 +499,10 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
 
                 <div className="rounded-card border border-clay/30 p-4 bg-clay/5 shadow-soft">
                   <div className="text-[10px] font-mono uppercase font-bold text-clay tracking-wider flex items-center gap-1">
-                    <Trash2 className="w-3.5 h-3.5" /> ESTIMATED WASTE
+                    <Trash2 className="w-3.5 h-3.5" /> PREDICTED WASTED PLATES
                   </div>
                   <div className="font-display font-bold text-2xl text-clay mt-1">
-                    {prediction.estimated_waste_kg !== undefined ? prediction.estimated_waste_kg : prediction.predictedWasteKg} kg
+                    {prediction.predicted_waste_plates !== undefined ? prediction.predicted_waste_plates : (prediction.predictedWastePlates || 0)} plates
                   </div>
                   <div className="text-[11px] text-clay/80 font-mono mt-0.5 font-semibold">
                     Waste Rate: {prediction.estimated_waste_percentage !== undefined ? prediction.estimated_waste_percentage : wastePercent}%
@@ -514,7 +514,7 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                     <Utensils className="w-3.5 h-3.5" /> ESTIMATED CONSUMPTION
                   </div>
                   <div className="font-display font-bold text-2xl text-ink mt-1">
-                    {prediction.estimated_consumption_kg !== undefined ? prediction.estimated_consumption_kg : prediction.predictedConsumption} kg
+                    {prediction.estimated_consumption_plates !== undefined ? prediction.estimated_consumption_plates : (prediction.predictedConsumption || 0)} plates
                   </div>
                   <div className="text-[11px] text-ink/60 font-mono mt-0.5">
                     Visitor Bookings: <span className="font-bold text-forest">{prediction.visitor_bookings ?? currentVisitorPasses} seats</span>
@@ -803,16 +803,16 @@ const FoodEntryForm = ({ prefill, onClearPrefill }) => {
           />
         </div>
         <div>
-          <label className="block text-xs uppercase tracking-wide text-ink/50 font-semibold mb-1">Food Wasted (kg)</label>
+          <label className="block text-xs uppercase tracking-wide text-ink/50 font-semibold mb-1">Food Wasted (Plates)</label>
           <input
             type="number"
-            step="0.1"
+            step="1"
             min="0"
             required
-            value={form.foodWastedKg}
-            onChange={(e) => setForm({ ...form, foodWastedKg: e.target.value })}
+            value={form.wastedPlates !== undefined ? form.wastedPlates : form.foodWastedKg}
+            onChange={(e) => setForm({ ...form, wastedPlates: e.target.value, foodWastedKg: e.target.value })}
             className="w-full rounded-xl border border-ink/15 bg-paper px-4 py-2.5 focus:border-forest outline-none text-sm font-medium"
-            placeholder="e.g. 2.1"
+            placeholder="e.g. 15"
           />
         </div>
         <div className="sm:col-span-2">
@@ -877,12 +877,12 @@ const WasteAnalytics = () => {
 
   const chartData = summary.trend.map((t) => ({
     date: new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-    kg: t.foodWastedKg,
+    plates: t.wastedPlates != null ? t.wastedPlates : Math.round((t.foodWastedKg || 0) / 0.35),
   }));
 
-  const reasonData = Object.entries(summary.reasonBreakdown).map(([reason, kg]) => ({
+  const reasonData = Object.entries(summary.reasonBreakdown).map(([reason, plates]) => ({
     reason: reason.replace('_', ' '),
-    kg: Math.round(kg * 100) / 100,
+    plates: Math.round(plates),
   }));
 
   // Calculate Average Accuracies from historical records
@@ -896,6 +896,8 @@ const WasteAnalytics = () => {
     ? Math.round((validAIRecords.reduce((s, p) => s + p.aiAccuracyPercentage, 0) / validAIRecords.length) * 10) / 10
     : 100;
 
+  const totalPlatesDisplay = summary.totalWastedPlates || Math.round((summary.totalWasteKg || 0) / 0.35);
+
   return (
     <div className="space-y-8">
       <div>
@@ -904,7 +906,7 @@ const WasteAnalytics = () => {
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Waste (30d)" value={`${summary.totalWasteKg} kg`} accent="clay" />
+        <StatCard label="Total Waste (30d)" value={`${totalPlatesDisplay} plates`} accent="clay" />
         <StatCard label="Target Execution Acc." value={`${avgTargetAccuracy}%`} accent="forest" sublabel="Prepared vs. Target" />
         <StatCard label="AI Forecast Acc." value={`${avgAIAccuracy}%`} accent="turmeric" sublabel="AI Rec vs. Consumed" />
         <StatCard label="Estimated Cost Lost" value={`₹${summary.estimatedCostLost}`} accent="sage" sublabel={`${summary.estimatedCarbonKg} kg CO₂e`} />
@@ -932,7 +934,7 @@ const WasteAnalytics = () => {
                 <th className="py-2.5 px-3">Target</th>
                 <th className="py-2.5 px-3">Prepared</th>
                 <th className="py-2.5 px-3">Consumed</th>
-                <th className="py-2.5 px-3">Waste (kg)</th>
+                <th className="py-2.5 px-3">Wasted Plates</th>
                 <th className="py-2.5 px-3">Cost Lost</th>
                 <th className="py-2.5 px-3">Target Acc.</th>
                 <th className="py-2.5 px-3">Status</th>
@@ -946,31 +948,34 @@ const WasteAnalytics = () => {
                   </td>
                 </tr>
               ) : (
-                performanceRecords.map((p) => (
-                  <tr key={p._id} className="hover:bg-paper/50 transition-colors font-mono">
-                    <td className="py-3 px-3 font-semibold text-ink">
-                      {new Date(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </td>
-                    <td className="py-3 px-3 font-bold text-forest flex items-center gap-1">
-                      <span>{MEAL_ICONS[p.mealType]}</span>
-                      <span>{p.mealType}</span>
-                    </td>
-                    <td className="py-3 px-3 text-ink/70">{p.expectedDiners ?? '—'}</td>
-                    <td className="py-3 px-3 font-bold text-ink">{p.targetPreparation ?? '—'}</td>
-                    <td className="py-3 px-3 font-bold text-forest">{p.mealsPrepared}</td>
-                    <td className="py-3 px-3 text-ink/80">{p.mealsConsumed}</td>
-                    <td className="py-3 px-3 text-clay font-bold">{p.foodWastedKg} kg</td>
-                    <td className="py-3 px-3 text-turmeric-dark">₹{p.estimatedCostLost}</td>
-                    <td className="py-3 px-3 font-bold">
-                      {p.targetAccuracyPercentage !== null ? `${p.targetAccuracyPercentage}%` : '—'}
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-paper border border-ink/10 whitespace-nowrap">
-                        {p.statusLabel}
-                      </span>
-                    </td>
-                  </tr>
-                ))
+                performanceRecords.map((p) => {
+                  const pPlates = p.wastedPlates != null ? p.wastedPlates : Math.round((p.foodWastedKg || 0) / 0.35);
+                  return (
+                    <tr key={p._id} className="hover:bg-paper/50 transition-colors font-mono">
+                      <td className="py-3 px-3 font-semibold text-ink">
+                        {new Date(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </td>
+                      <td className="py-3 px-3 font-bold text-forest flex items-center gap-1">
+                        <span>{MEAL_ICONS[p.mealType]}</span>
+                        <span>{p.mealType}</span>
+                      </td>
+                      <td className="py-3 px-3 text-ink/70">{p.expectedDiners ?? '—'}</td>
+                      <td className="py-3 px-3 font-bold text-ink">{p.targetPreparation ?? '—'}</td>
+                      <td className="py-3 px-3 font-bold text-forest">{p.mealsPrepared}</td>
+                      <td className="py-3 px-3 text-ink/80">{p.mealsConsumed}</td>
+                      <td className="py-3 px-3 text-clay font-bold">{pPlates} plates</td>
+                      <td className="py-3 px-3 text-turmeric-dark">₹{p.estimatedCostLost}</td>
+                      <td className="py-3 px-3 font-bold">
+                        {p.targetAccuracyPercentage !== null ? `${p.targetAccuracyPercentage}%` : '—'}
+                      </td>
+                      <td className="py-3 px-3">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-paper border border-ink/10 whitespace-nowrap">
+                          {p.statusLabel}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -979,27 +984,27 @@ const WasteAnalytics = () => {
 
       {/* TREND CHARTS */}
       <div className="bg-cardcream rounded-card border border-ink/10 p-6 shadow-soft">
-        <h3 className="font-display text-lg font-bold text-ink mb-4">Waste Trend (Last 30 Days)</h3>
+        <h3 className="font-display text-lg font-bold text-ink mb-4">Food Waste Trend (Plates - Last 30 Days)</h3>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={chartData}>
             <CartesianGrid stroke="#E4DFC8" strokeDasharray="3 3" />
             <XAxis dataKey="date" tick={{ fontSize: 11 }} interval={4} />
-            <YAxis tick={{ fontSize: 11 }} unit="kg" />
+            <YAxis tick={{ fontSize: 11 }} unit=" plates" />
             <Tooltip />
-            <Line type="monotone" dataKey="kg" stroke="#A64B34" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="plates" stroke="#A64B34" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       <div className="bg-cardcream rounded-card border border-ink/10 p-6 shadow-soft">
-        <h3 className="font-display text-lg font-bold text-ink mb-4">Waste by Root Cause</h3>
+        <h3 className="font-display text-lg font-bold text-ink mb-4">Waste by Root Cause (Plates)</h3>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={reasonData}>
             <CartesianGrid stroke="#E4DFC8" strokeDasharray="3 3" />
             <XAxis dataKey="reason" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} unit="kg" />
+            <YAxis tick={{ fontSize: 11 }} unit=" plates" />
             <Tooltip />
-            <Bar dataKey="kg" fill="#DFA13B" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="plates" fill="#DFA13B" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

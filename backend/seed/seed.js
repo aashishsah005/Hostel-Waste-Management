@@ -64,7 +64,8 @@ async function seed() {
       const prepared = booked + randomBetween(5, 20);
       const wasteFraction = Math.random() * 0.15; // up to 15% waste
       const consumed = Math.round(prepared * (1 - wasteFraction));
-      const wastedKg = Math.round((prepared - consumed) * 0.35 * 100) / 100; // ~0.35kg per uneaten meal
+      const wastedPlates = Math.max(0, prepared - consumed);
+      const wastedKg = Math.round(wastedPlates * 0.35 * 100) / 100;
 
       await FoodEntry.create({
         date,
@@ -72,8 +73,9 @@ async function seed() {
         mealsBooked: booked,
         mealsPrepared: prepared,
         mealsConsumed: consumed,
+        wastedPlates,
         foodWastedKg: wastedKg,
-        wasteReason: wastedKg > 3 ? reasons[randomBetween(1, reasons.length - 1)] : 'none',
+        wasteReason: wastedPlates > 8 ? reasons[randomBetween(1, reasons.length - 1)] : 'none',
         recordedBy: manager._id,
       });
     }

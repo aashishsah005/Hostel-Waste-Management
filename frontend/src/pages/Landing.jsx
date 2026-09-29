@@ -207,7 +207,7 @@ const staffCapabilities = [
   },
   {
     title: 'Daily Food Entry Logger',
-    desc: 'Record exact meals prepared, consumed, food wasted in kg, and add operational notes.',
+    desc: 'Record exact meals prepared, consumed, food wasted in plates, and add operational notes.',
     tag: 'Daily Log',
     icon: <ClipboardList className="w-6 h-6 text-forest" />,
   },
@@ -274,7 +274,7 @@ const Landing = () => {
   }, []);
 
   const savedPercent = stats && stats.savedPercent != null ? stats.savedPercent : 93;
-  const wasteKg = stats && stats.totalWasteKg != null ? stats.totalWasteKg : 305.9;
+  const wastePlates = stats && stats.totalWastedPlates != null ? stats.totalWastedPlates : (stats && stats.totalWasteKg ? Math.round(stats.totalWasteKg / 0.35) : 874);
   const costLost = stats && stats.estimatedCostLost != null ? stats.estimatedCostLost : 18354;
   const bookings = stats && stats.totalBookings != null ? stats.totalBookings : 240;
   const students = stats && stats.totalStudents != null ? stats.totalStudents : 150;
@@ -389,7 +389,7 @@ const Landing = () => {
             </div>
           </div>
 
-          {/* Stat Card 3: Top Right - 305.9 kg Food Wasted */}
+          {/* Stat Card 3: Top Right - Food Wasted (Plates) */}
           <div className="absolute top-6 right-0 sm:-right-4 bg-paper/95 backdrop-blur border border-ink/10 shadow-soft p-3.5 rounded-2xl flex items-center gap-3 text-left z-20 hover:-translate-y-1 transition-transform">
             <div className="w-10 h-10 rounded-xl bg-clay/15 text-clay flex items-center justify-center shrink-0">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -397,7 +397,7 @@ const Landing = () => {
               </svg>
             </div>
             <div>
-              <div className="font-display font-bold text-xl text-clay leading-none">{wasteKg} kg</div>
+              <div className="font-display font-bold text-xl text-clay leading-none">{wastePlates} plates</div>
               <div className="text-[11px] text-ink/60 font-body mt-1 font-semibold">Food Wasted <span className="text-[10px] block font-mono font-normal text-ink/40">(30d total)</span></div>
             </div>
           </div>
@@ -431,16 +431,16 @@ const Landing = () => {
         <div className="bg-forest rounded-card text-paper p-6 md:p-8 shadow-lift grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 text-center divide-y sm:divide-y-0 sm:divide-x divide-paper/15">
           <div className="pt-2 sm:pt-0">
             <div className="flex items-center justify-center gap-1.5 text-turmeric font-bold text-xl font-display">
-              <Coins className="w-5 h-5 text-turmeric shrink-0" /> ₹60 / kg
+              <Coins className="w-5 h-5 text-turmeric shrink-0" /> ₹40 / plate
             </div>
             <div className="text-xs text-paper/75 font-mono mt-1">Cost Basis</div>
           </div>
 
           <div className="pt-2 sm:pt-0">
             <div className="flex items-center justify-center gap-1.5 text-paper font-bold text-xl font-display">
-              <Cloud className="w-5 h-5 text-paper shrink-0" /> 2.5 kg
+              <Cloud className="w-5 h-5 text-paper shrink-0" /> 0.8 kg
             </div>
-            <div className="text-xs text-paper/75 font-mono mt-1">CO₂e per kg</div>
+            <div className="text-xs text-paper/75 font-mono mt-1">CO₂e per plate</div>
           </div>
 
           <div className="pt-2 sm:pt-0">
@@ -616,7 +616,7 @@ const Landing = () => {
                 Less food wasted. Better planning. Lower cost.
               </h2>
               <p className="text-paper/80 text-xs sm:text-sm leading-relaxed max-w-lg">
-                Every kg of food wasted costs <span className="text-turmeric font-bold">₹60</span> and emits <span className="text-turmeric font-bold">2.5 kg of CO₂e</span>. Together we build a sustainable campus.
+                Every plate of food wasted costs <span className="text-turmeric font-bold">₹40</span> and emits <span className="text-turmeric font-bold">0.8 kg of CO₂e</span>. Together we build a sustainable campus.
               </p>
             </div>
 
@@ -626,7 +626,7 @@ const Landing = () => {
                 <div className="text-[11px] text-paper/70 font-mono mt-1">Est. Money Saved <span className="block text-[10px]">(30 Days)</span></div>
               </div>
               <div className="px-2">
-                <div className="font-display font-bold text-xl sm:text-2xl text-paper">7,275 kg</div>
+                <div className="font-display font-bold text-xl sm:text-2xl text-paper">7,275 plates</div>
                 <div className="text-[11px] text-paper/70 font-mono mt-1">Food Waste Reduced <span className="block text-[10px]">(30 Days)</span></div>
               </div>
               <div className="px-2">

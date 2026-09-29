@@ -17,4 +17,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      const msg = error.response.data?.message || '';
+      if (
+        msg.includes('user not found') ||
+        msg.includes('token invalid') ||
+        msg.includes('no token provided')
+      ) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

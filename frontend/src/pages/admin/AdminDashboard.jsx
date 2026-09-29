@@ -733,10 +733,10 @@ const AnalyticsTab = () => {
 
   if (!waste || !feedback) return <Loader label="Pulling system analytics..." />;
 
-  const savedPercent = waste.totalPrepared ? Math.round((waste.totalConsumed / waste.totalPrepared) * 100) : 0;
+  const totalPlatesDisplay = waste.totalWastedPlates != null ? waste.totalWastedPlates : Math.round((waste.totalWasteKg || 0) / 0.35);
   const pieData = Object.entries(waste.reasonBreakdown)
     .filter(([, v]) => v > 0)
-    .map(([reason, kg]) => ({ name: reason.replace('_', ' '), value: Math.round(kg * 100) / 100 }));
+    .map(([reason, val]) => ({ name: reason.replace('_', ' '), value: Math.round(val * 100) / 100 }));
 
   return (
     <div className="space-y-6">
@@ -745,7 +745,7 @@ const AnalyticsTab = () => {
           <PlateGauge savedPercent={savedPercent} label="Meals fulfilled vs. prepared (30d)" />
         </div>
         <div className="md:col-span-2 grid sm:grid-cols-2 gap-4">
-          <StatCard label="Total waste (30d)" value={`${waste.totalWasteKg} kg`} accent="clay" />
+          <StatCard label="Total waste (30d)" value={`${totalPlatesDisplay} plates`} accent="clay" />
           <StatCard label="Estimated cost lost" value={`₹${waste.estimatedCostLost}`} accent="turmeric" />
           <StatCard label="Estimated CO₂e" value={`${waste.estimatedCarbonKg} kg`} accent="sage" />
           <StatCard label="Avg. student rating" value={`${feedback.avgTaste} / 5`} sublabel="taste, last 200 responses" accent="forest" />
@@ -754,7 +754,7 @@ const AnalyticsTab = () => {
 
       <div className="grid md:grid-cols-2 gap-6">
         <div className="bg-cardcream rounded-card border border-ink/10 p-5 shadow-soft">
-          <h3 className="font-display text-lg font-bold text-ink mb-4">Waste by root cause (kg)</h3>
+          <h3 className="font-display text-lg font-bold text-ink mb-4">Waste by root cause (plates)</h3>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>

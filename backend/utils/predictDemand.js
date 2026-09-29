@@ -17,7 +17,7 @@ function predictFromHistory(history, upcomingBookings) {
   if (!history || history.length === 0) {
     return {
       predictedConsumption: upcomingBookings || 0,
-      predictedWasteKg: 0,
+      predictedWastePlates: 0,
       confidence: 'low',
       method: 'no-history-fallback',
     };
@@ -32,19 +32,19 @@ function predictFromHistory(history, upcomingBookings) {
     0
   ) / weightSum;
 
-  const avgWastePerMeal = recent.reduce((sum, entry) => {
-    const wastePerConsumed = entry.mealsPrepared > 0 ? entry.foodWastedKg / entry.mealsPrepared : 0;
-    return sum + wastePerConsumed;
+  const avgWastedPlates = recent.reduce((sum, entry) => {
+    const plates = entry.wastedPlates != null ? entry.wastedPlates : Math.round((entry.foodWastedKg || 0) / 0.35);
+    return sum + plates;
   }, 0) / recent.length;
 
   // Blend historical average with current booking signal (60/40)
   const bookingSignal = upcomingBookings || weightedConsumption;
   const predictedConsumption = Math.round(weightedConsumption * 0.6 + bookingSignal * 0.4);
-  const predictedWasteKg = Math.round(avgWastePerMeal * predictedConsumption * 100) / 100;
+  const predictedWastePlates = Math.max(0, Math.round(avgWastedPlates));
 
   return {
     predictedConsumption,
-    predictedWasteKg,
+    predictedWastePlates,
     recommendedPreparation: Math.round(predictedConsumption * 1.05), // small 5% buffer
     confidence: recent.length >= 5 ? 'high' : recent.length >= 3 ? 'medium' : 'low',
     method: 'weighted-moving-average',

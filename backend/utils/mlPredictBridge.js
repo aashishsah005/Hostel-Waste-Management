@@ -128,15 +128,14 @@ async function getMealPrediction({ dateStr, mealType, overrides = {} }) {
 
   // 5. Look up previous FoodEntry for historical context if available
   const MEAL_BENCHMARKS = {
-    Breakfast: { prevPrepared: 118.0, prevConsumed: 112.0, prevWaste: 6.0, prevAtt: 440 },
-    Lunch: { prevPrepared: 215.0, prevConsumed: 205.0, prevWaste: 10.0, prevAtt: 475 },
-    Snacks: { prevPrepared: 68.0, prevConsumed: 63.0, prevWaste: 5.0, prevAtt: 445 },
-    Dinner: { prevPrepared: 220.0, prevConsumed: 210.0, prevWaste: 10.0, prevAtt: 475 },
+    Breakfast: { prevPrepared: 118.0, prevConsumed: 112.0, prevWastePlates: 18, prevAtt: 440 },
+    Lunch: { prevPrepared: 215.0, prevConsumed: 205.0, prevWastePlates: 28, prevAtt: 475 },
+    Dinner: { prevPrepared: 220.0, prevConsumed: 210.0, prevWastePlates: 28, prevAtt: 475 },
   };
   const b = MEAL_BENCHMARKS[mealType] || MEAL_BENCHMARKS.Lunch;
   let prevPrepared = overrides.previous_day_prepared_kg !== undefined ? Number(overrides.previous_day_prepared_kg) : b.prevPrepared;
   let prevConsumed = overrides.previous_day_consumed_kg !== undefined ? Number(overrides.previous_day_consumed_kg) : b.prevConsumed;
-  let prevWaste = overrides.previous_day_waste_kg !== undefined ? Number(overrides.previous_day_waste_kg) : b.prevWaste;
+  let prevWastePlates = overrides.previous_day_wasted_plates !== undefined ? Number(overrides.previous_day_wasted_plates) : (overrides.previous_day_waste_plates !== undefined ? Number(overrides.previous_day_waste_plates) : b.prevWastePlates);
   let prevAtt = overrides.previous_day_attendance !== undefined ? Number(overrides.previous_day_attendance) : b.prevAtt;
 
   // 6. Build Payload for ML Model
@@ -153,7 +152,7 @@ async function getMealPrediction({ dateStr, mealType, overrides = {} }) {
     previous_day_attendance: prevAtt,
     previous_day_prepared_kg: prevPrepared,
     previous_day_consumed_kg: prevConsumed,
-    previous_day_waste_kg: prevWaste,
+    previous_day_wasted_plates: prevWastePlates,
     holiday: overrides.holiday || 0,
     exam_period: overrides.exam_period || 0,
     temperature_c: overrides.temperature_c || 28.0,
