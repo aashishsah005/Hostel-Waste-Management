@@ -29,10 +29,9 @@ METADATA_PATH = os.path.join(MODEL_DIR, "model_metadata.json")
 
 # Fallback typical benchmarks by meal type if previous-day stats are omitted
 MEAL_DEFAULTS = {
-    "Breakfast": {"prev_att": 440, "prev_prep": 118.0, "prev_cons": 112.0, "prev_w": 6.0, "default_menu": "Idli, Sambar, Chutney"},
-    "Lunch": {"prev_att": 475, "prev_prep": 215.0, "prev_cons": 205.0, "prev_w": 10.0, "default_menu": "Dal, Rice, Roti, Mixed Veg"},
-    "Snacks": {"prev_att": 445, "prev_prep": 68.0, "prev_cons": 63.0, "prev_w": 5.0, "default_menu": "Pakora, Tea"},
-    "Dinner": {"prev_att": 475, "prev_prep": 220.0, "prev_cons": 210.0, "prev_w": 10.0, "default_menu": "Paneer Curry, Roti, Rice"},
+    "Breakfast": {"prev_att": 440, "prev_prep": 118.0, "prev_cons": 112.0, "prev_w_plates": 18, "default_menu": "Idli, Sambar, Chutney"},
+    "Lunch": {"prev_att": 475, "prev_prep": 215.0, "prev_cons": 205.0, "prev_w_plates": 28, "default_menu": "Dal, Rice, Roti, Mixed Veg"},
+    "Dinner": {"prev_att": 475, "prev_prep": 220.0, "prev_cons": 210.0, "prev_w_plates": 28, "default_menu": "Paneer Curry, Roti, Rice"},
 }
 
 
@@ -94,6 +93,10 @@ def _prepare_dataframe(input_data):
     else:
         expected_attendance = int(expected_attendance)
 
+    prev_w_plates = data.get("previous_day_wasted_plates")
+    if prev_w_plates is None:
+        prev_w_plates = data.get("previous_day_waste_plates", defaults["prev_w_plates"])
+
     row = {
         "day_of_week": str(data.get("day_of_week", "Monday")),
         "meal_type": str(meal_type),
@@ -108,7 +111,7 @@ def _prepare_dataframe(input_data):
         "previous_day_attendance": int(data.get("previous_day_attendance", defaults["prev_att"])),
         "previous_day_prepared_kg": float(data.get("previous_day_prepared_kg", defaults["prev_prep"])),
         "previous_day_consumed_kg": float(data.get("previous_day_consumed_kg", defaults["prev_cons"])),
-        "previous_day_waste_kg": float(data.get("previous_day_waste_kg", defaults["prev_w"])),
+        "previous_day_wasted_plates": int(prev_w_plates),
         "holiday": int(data.get("holiday", 0)),
         "exam_period": int(data.get("exam_period", 0)),
         "temperature_c": float(data.get("temperature_c", 28.0))
@@ -118,7 +121,7 @@ def _prepare_dataframe(input_data):
         'day_of_week', 'meal_type', 'menu',
         'total_students', 'visitor_bookings', 'visitor_attendance_rate', 'expected_visitor_attendance',
         'student_attendance_rate', 'expected_student_attendance', 'expected_attendance',
-        'previous_day_attendance', 'previous_day_prepared_kg', 'previous_day_consumed_kg', 'previous_day_waste_kg',
+        'previous_day_attendance', 'previous_day_prepared_kg', 'previous_day_consumed_kg', 'previous_day_wasted_plates',
         'holiday', 'exam_period', 'temperature_c'
     ]
 
@@ -137,39 +140,46 @@ def predict_food_requirement(input_data):
 
 def predict_food_waste(input_data):
     """
-    Predicts expected food waste in kilograms (waste_kg).
+    Predicts expected food waste in number of plates (wasted_plates).
+    Enforces discrete non-negative integer bounds: 0 <= predicted_wasted_plates <= total_students.
     """
     _load_models()
-    df, _ = _prepare_dataframe(input_data)
-    pred = float(_waste_model.predict(df)[0])
-    return round(max(0.0, pred), 2)
+    df, row_info = _prepare_dataframe(input_data)
+    total_students = row_info.get("total_students", 500)
+    raw_pred = float(_waste_model.predict(df)[0])
+    return max(0, min(total_students, int(round(raw_pred))))
 
 
 def predict_all(input_data):
     """
     Executes both food requirement and waste models and returns complete JSON response.
+    Target output: predicted_waste_plates (discrete plates).
     """
     _load_models()
     df, row_info = _prepare_dataframe(input_data)
+    total_students = row_info.get("total_students", 500)
+    expected_total = row_info.get("expected_attendance", 450)
     
     req_kg = round(max(0.0, float(_req_model.predict(df)[0])), 2)
-    waste_kg = round(max(0.0, float(_waste_model.predict(df)[0])), 2)
-    cons_kg = round(max(0.0, req_kg - waste_kg), 2)
-    waste_pct = round((waste_kg / req_kg * 100) if req_kg > 0 else 0.0, 2)
+    raw_waste_plates = float(_waste_model.predict(df)[0])
+    predicted_waste_plates = max(0, min(total_students, int(round(raw_waste_plates))))
+    
+    estimated_consumption_plates = max(0, expected_total - predicted_waste_plates)
+    waste_pct = round((predicted_waste_plates / max(1, expected_total) * 100), 2)
 
     return {
         "success": True,
         "meal_type": row_info["meal_type"],
         "menu": row_info["menu"],
         "day_of_week": row_info["day_of_week"],
-        "total_students": row_info["total_students"],
+        "total_students": total_students,
         "expected_student_attendance": row_info["expected_student_attendance"],
         "visitor_bookings": row_info["visitor_bookings"],
         "expected_visitor_attendance": row_info["expected_visitor_attendance"],
-        "expected_total_attendance": row_info["expected_attendance"],
+        "expected_total_attendance": expected_total,
         "food_required_kg": req_kg,
-        "estimated_waste_kg": waste_kg,
-        "estimated_consumption_kg": cons_kg,
+        "predicted_waste_plates": predicted_waste_plates,
+        "estimated_consumption_plates": estimated_consumption_plates,
         "estimated_waste_percentage": waste_pct
     }
 
@@ -200,7 +210,7 @@ if __name__ == "__main__":
         "previous_day_attendance": 470,
         "previous_day_prepared_kg": 195,
         "previous_day_consumed_kg": 184,
-        "previous_day_waste_kg": 11,
+        "previous_day_wasted_plates": 25,
         "holiday": 0,
         "exam_period": 0,
         "temperature_c": 30
@@ -211,3 +221,4 @@ if __name__ == "__main__":
     print(" SAMPLE ML PREDICTION OUTPUT (predict.py) ")
     print("=" * 60)
     print(json.dumps(result, indent=2))
+

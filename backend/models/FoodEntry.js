@@ -7,7 +7,8 @@ const foodEntrySchema = new mongoose.Schema(
     mealsBooked: { type: Number, required: true, default: 0 },
     mealsPrepared: { type: Number, required: true, default: 0 },
     mealsConsumed: { type: Number, required: true, default: 0 },
-    foodWastedKg: { type: Number, required: true, default: 0 },
+    wastedPlates: { type: Number, required: true, default: 0 },
+    foodWastedKg: { type: Number, default: 0 },
     wasteReason: {
       type: String,
       enum: ['none', 'exam_period', 'holiday', 'unpopular_menu', 'weather', 'over_preparation', 'other'],

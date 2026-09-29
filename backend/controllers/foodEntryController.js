@@ -18,12 +18,17 @@ const createFoodEntry = async (req, res, next) => {
       aiRecommendedPrep,
     } = req.body;
 
+    const wastedPlates = req.body.wastedPlates !== undefined
+      ? Number(req.body.wastedPlates)
+      : (req.body.foodWastedKg ? Math.round(Number(req.body.foodWastedKg) / 0.35) : 0);
+
     const payload = {
       date,
       mealType,
       mealsBooked: Number(mealsBooked) || 0,
       mealsPrepared: Number(mealsPrepared) || 0,
       mealsConsumed: Number(mealsConsumed) || 0,
+      wastedPlates: Math.max(0, wastedPlates),
       foodWastedKg: Number(foodWastedKg) || 0,
       wasteReason: wasteReason || 'none',
       notes: notes || '',
@@ -93,8 +98,8 @@ const predictDemand = async (req, res, next) => {
         mealType,
         ...mlPrediction,
         recommendedPreparation: mlPrediction.food_required_kg,
-        predictedConsumption: mlPrediction.estimated_consumption_kg,
-        predictedWasteKg: mlPrediction.estimated_waste_kg,
+        predictedConsumption: mlPrediction.estimated_consumption_plates,
+        predictedWastePlates: mlPrediction.predicted_waste_plates,
         method: 'scikit-learn-ml-pipeline',
       });
     } catch (mlErr) {

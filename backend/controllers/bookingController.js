@@ -241,7 +241,7 @@ const bookVisitorMeal = async (req, res, next) => {
 
     // Create Paid Visitor Booking Record with Single Unified Token for the group
     const booking = await Booking.create({
-      student: req.user._id,
+      student: req.user ? req.user._id : null,
       date: targetDate,
       mealType,
       status: 'booked',

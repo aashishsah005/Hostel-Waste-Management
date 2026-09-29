@@ -13,22 +13,24 @@ const getWasteSummary = async (req, res, next) => {
     }
     const entries = await FoodEntry.find(filter).sort({ date: 1 });
 
-    const totalWasteKg = entries.reduce((sum, e) => sum + e.foodWastedKg, 0);
+    const totalWastedPlates = entries.reduce((sum, e) => sum + (e.wastedPlates != null ? e.wastedPlates : Math.round((e.foodWastedKg || 0) / 0.35)), 0);
+    const totalWasteKg = entries.reduce((sum, e) => sum + (e.foodWastedKg || 0), 0);
     const totalPrepared = entries.reduce((sum, e) => sum + e.mealsPrepared, 0);
     const totalConsumed = entries.reduce((sum, e) => sum + e.mealsConsumed, 0);
-    const avgWastePerEntry = entries.length ? totalWasteKg / entries.length : 0;
+    const avgWastedPlatesPerEntry = entries.length ? Math.round(totalWastedPlates / entries.length) : 0;
 
-    // Estimated cost saved / lost — a rough figure using an assumed per-kg cost.
-    const COST_PER_KG = 60; // INR, adjustable assumption, documented for the report
-    const estimatedCostLost = Math.round(totalWasteKg * COST_PER_KG);
+    // Estimated cost saved / lost — ₹40 per wasted plate
+    const COST_PER_PLATE = 40;
+    const estimatedCostLost = Math.round(totalWastedPlates * COST_PER_PLATE);
 
-    // Very simple formula-based carbon estimate (kg CO2e per kg food waste)
-    const CO2E_PER_KG = 2.5;
-    const estimatedCarbonKg = Math.round(totalWasteKg * CO2E_PER_KG * 100) / 100;
+    // Carbon estimate: 0.8 kg CO2e per wasted plate
+    const CO2E_PER_PLATE = 0.8;
+    const estimatedCarbonKg = Math.round(totalWastedPlates * CO2E_PER_PLATE * 100) / 100;
 
     const trend = entries.map((e) => ({
       date: e.date,
       mealType: e.mealType,
+      wastedPlates: e.wastedPlates != null ? e.wastedPlates : Math.round((e.foodWastedKg || 0) / 0.35),
       foodWastedKg: e.foodWastedKg,
       mealsPrepared: e.mealsPrepared,
       mealsConsumed: e.mealsConsumed,
@@ -36,16 +38,18 @@ const getWasteSummary = async (req, res, next) => {
     }));
 
     const reasonBreakdown = entries.reduce((acc, e) => {
-      acc[e.wasteReason] = (acc[e.wasteReason] || 0) + e.foodWastedKg;
+      const plates = e.wastedPlates != null ? e.wastedPlates : Math.round((e.foodWastedKg || 0) / 0.35);
+      acc[e.wasteReason] = (acc[e.wasteReason] || 0) + plates;
       return acc;
     }, {});
 
     res.json({
+      totalWastedPlates,
       totalWasteKg: Math.round(totalWasteKg * 100) / 100,
       totalPrepared,
       totalConsumed,
       fulfilmentRate: totalPrepared ? Math.round((totalConsumed / totalPrepared) * 1000) / 10 : 0,
-      avgWastePerEntry: Math.round(avgWastePerEntry * 100) / 100,
+      avgWastedPlatesPerEntry,
       estimatedCostLost,
       estimatedCarbonKg,
       reasonBreakdown,
@@ -106,15 +110,17 @@ const getPublicStats = async (req, res, next) => {
       Feedback.countDocuments({}),
     ]);
 
-    const totalWasteKg = entries.reduce((sum, e) => sum + e.foodWastedKg, 0);
+    const totalWastedPlates = entries.reduce((sum, e) => sum + (e.wastedPlates != null ? e.wastedPlates : Math.round((e.foodWastedKg || 0) / 0.35)), 0);
+    const totalWasteKg = entries.reduce((sum, e) => sum + (e.foodWastedKg || 0), 0);
     const totalPrepared = entries.reduce((sum, e) => sum + e.mealsPrepared, 0);
     const totalConsumed = entries.reduce((sum, e) => sum + e.mealsConsumed, 0);
     const savedPercent = totalPrepared ? Math.round((totalConsumed / totalPrepared) * 100) : 0;
-    const estimatedCostLost = Math.round(totalWasteKg * 60);
-    const estimatedCarbonKg = Math.round(totalWasteKg * 2.5 * 100) / 100;
+    const estimatedCostLost = Math.round(totalWastedPlates * 40);
+    const estimatedCarbonKg = Math.round(totalWastedPlates * 0.8 * 100) / 100;
 
     res.json({
       savedPercent,
+      totalWastedPlates,
       totalWasteKg: Math.round(totalWasteKg * 100) / 100,
       totalPrepared,
       totalConsumed,
@@ -123,8 +129,8 @@ const getPublicStats = async (req, res, next) => {
       feedbackCount,
       estimatedCostLost,
       estimatedCarbonKg,
-      costPerKg: 60,
-      co2PerKg: 2.5,
+      costPerPlate: 40,
+      co2PerPlate: 0.8,
     });
   } catch (err) {
     next(err);
