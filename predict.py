@@ -11,6 +11,8 @@ Functions:
 import os
 import sys
 import json
+import warnings
+warnings.filterwarnings("ignore")
 import joblib
 import pandas as pd
 import numpy as np
