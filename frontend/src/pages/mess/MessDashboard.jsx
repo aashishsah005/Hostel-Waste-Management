@@ -32,6 +32,14 @@ import {
 
 const MEALS = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
 const todayISO = () => new Date().toISOString().slice(0, 10);
+const tomorrowISO = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+};
+const formatDisplayDate = (isoStr) => new Date(isoStr + 'T00:00:00').toLocaleDateString('en-US', {
+  weekday: 'long', month: 'short', day: 'numeric', year: 'numeric',
+});
 
 const MEAL_TIMINGS = {
   Breakfast: '7:00 AM – 8:00 AM',
@@ -190,14 +198,16 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
   const [bookingCounts, setBookingCounts] = useState([]);
   const [managerNotifications, setManagerNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewDate, setViewDate] = useState(todayISO()); // 'today' or 'tomorrow'
+  const isTomorrow = viewDate === tomorrowISO();
 
   const loadData = async () => {
     setLoading(true);
     try {
       const [countRes, notifRes, predResults] = await Promise.all([
-        api.get('/bookings/counts', { params: { date: todayISO() } }),
+        api.get('/bookings/counts', { params: { date: viewDate } }),
         api.get('/notifications').catch(() => ({ data: { notifications: [] } })),
-        Promise.all(MEALS.map((m) => api.get('/food-entries/predict', { params: { mealType: m } }))),
+        Promise.all(MEALS.map((m) => api.get('/food-entries/predict', { params: { mealType: m, date: viewDate } }))),
       ]);
 
       const predMap = {};
@@ -218,7 +228,7 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [viewDate]);
 
   useEffect(() => {
     if (allPredictions[mealType]) {
@@ -283,7 +293,7 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
 
       {/* FOUR-MEAL KITCHEN PLANNING GRID */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h2 className="font-display text-xl font-bold text-ink flex items-center gap-2">
               <span>FOUR-MEAL KITCHEN PLANNING GRID</span>
@@ -295,7 +305,44 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
               Live expected diners, AI recommendations, final prep targets, and meal closing audit.
             </p>
           </div>
+
+          {/* TODAY / TOMORROW TOGGLE */}
+          <div className="flex items-center gap-1.5 bg-paper border border-ink/15 rounded-full p-1 shadow-soft">
+            <button
+              onClick={() => setViewDate(todayISO())}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                !isTomorrow
+                  ? 'bg-forest text-paper shadow-soft'
+                  : 'text-ink/60 hover:text-ink'
+              }`}
+            >
+              📅 Today
+            </button>
+            <button
+              onClick={() => setViewDate(tomorrowISO())}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                isTomorrow
+                  ? 'bg-turmeric text-ink shadow-soft'
+                  : 'text-ink/60 hover:text-ink'
+              }`}
+            >
+              🔮 Tomorrow
+            </button>
+          </div>
         </div>
+
+        {/* TOMORROW FORECAST BANNER */}
+        {isTomorrow && (
+          <div className="flex items-center gap-3 bg-turmeric/10 border border-turmeric/30 rounded-2xl px-4 py-3">
+            <span className="text-xl">🔮</span>
+            <div>
+              <div className="text-xs font-mono font-bold text-turmeric-dark uppercase tracking-wide">Tomorrow's Forecast Mode</div>
+              <div className="text-xs text-ink/65 mt-0.5">
+                Showing AI predictions for <strong>{formatDisplayDate(tomorrowISO())}</strong>. Live skip/visitor data reflects today; AI demand is forecast for tomorrow.
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {MEALS.map((m) => {
