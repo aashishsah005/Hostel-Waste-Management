@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: hostel-waste-management-backend
+    env: node
+    region: singapore
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        fromDatabase:
+          name: hostel-db
+          property: connectionString
+      # Set these manually in Render Dashboard → Environment:
+      # JWT_SECRET, JWT_EXPIRES_IN, CLIENT_URL (your Vercel URL)
