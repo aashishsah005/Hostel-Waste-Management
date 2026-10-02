@@ -38,9 +38,54 @@ async function seed() {
   ]);
 
   console.log('Creating users...');
-  const admin = await User.create({ name: 'Admin User', email: 'admin@hostel.edu', password: 'admin123', role: 'admin' });
-  const manager = await User.create({ name: 'Mess Manager', email: 'manager@hostel.edu', password: 'manager123', role: 'mess_manager' });
-  const student = await User.create({ name: 'Student User', email: 'abc@gmail.com', password: '123', role: 'student', hostelBlock: 'A', roomNumber: '101', phone: '9876543210' });
+  const bcrypt = require('bcryptjs');
+  const hashedStudentPassword = await bcrypt.hash('123', 10);
+
+  const firstNames = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Rahul', 'Sneha', 'Aditya', 'Pooja', 'Vikram', 'Riya', 'Amit', 'Neha', 'Rajesh', 'Kavya', 'Vivek', 'Anushka', 'Arjun', 'Ishita', 'Dev', 'Diya', 'Siddharth', 'Meera', 'Kunal', 'Tanvi', 'Yash', 'Shreya', 'Karan', 'Nisha', 'Varun', 'Simran', 'Akash', 'Roshni', 'Manish', 'Aditi', 'Nikhil', 'Sanjana', 'Gaurav', 'Divya', 'Abhinav', 'Ritu', 'Mohit', 'Preeti', 'Harish', 'Ankita', 'Sanjay', 'Rashmi', 'Chetan', 'Bhavna', 'Pranav', 'Kriti'];
+  const lastNames = ['Sharma', 'Verma', 'Gupta', 'Patel', 'Singh', 'Kumar', 'Sah', 'Roy', 'Das', 'Reddy', 'Nair', 'Joshi', 'Mehta', 'Agarwal', 'Mishra', 'Rao', 'Bhat', 'Chawla', 'Banerjee', 'Chatterjee', 'Mukherjee', 'Ghosh', 'Kulkarni', 'Deshmukh', 'Patil', 'Hegde', 'Menon', 'Pillai', 'Iyer', 'Iyengar', 'Nambiar', 'Sen', 'Dutta', 'Bose', 'Trivedi', 'Pandey', 'Shukla', 'Tiwari', 'Dubey', 'Yadav', 'Chauhan', 'Rathore', 'Solanki', 'Parmar', 'Rajput', 'Jha', 'Choudhary', 'Thakur', 'Saxena', 'Bhattacharya'];
+  const blocks = ['Block A', 'Block B', 'Block C', 'Block D'];
+
+  const admin = await User.create({ name: 'Admin User', email: 'admin@gmail.com', password: 'admin123', role: 'admin' });
+  const manager = await User.create({ name: 'Mess Manager', email: 'manager@gmail.com', password: 'manager123', role: 'mess_manager' });
+
+  const studentUsers = [
+    {
+      name: 'Aashish Sah',
+      email: 'abc@gmail.com',
+      password: hashedStudentPassword,
+      role: 'student',
+      hostelBlock: 'Block A',
+      roomNumber: '101',
+      phone: '9876543210',
+      isActive: true,
+    }
+  ];
+
+  for (let i = 2; i <= 500; i++) {
+    const fn = firstNames[(i - 1) % firstNames.length];
+    const ln = lastNames[Math.floor((i - 1) / firstNames.length) % lastNames.length];
+    const name = `${fn} ${ln}`;
+    const cleanFn = fn.toLowerCase();
+    const cleanLn = ln.toLowerCase();
+    const email = i <= 20 ? `${cleanFn}.${cleanLn}${i}@gmail.com` : `student${i}@gmail.com`;
+    const block = blocks[(i - 1) % blocks.length];
+    const room = `${100 + Math.floor((i - 1) / 4)}`;
+    const phone = `987${String(6500000 + i).padStart(7, '0')}`;
+
+    studentUsers.push({
+      name,
+      email,
+      password: hashedStudentPassword,
+      role: 'student',
+      hostelBlock: block,
+      roomNumber: room,
+      phone,
+      isActive: true,
+    });
+  }
+
+  console.log(`Inserting ${studentUsers.length} Indian student accounts...`);
+  await User.insertMany(studentUsers);
 
   console.log('Creating weekly menu...');
   for (const day of DAYS) {
@@ -83,8 +128,8 @@ async function seed() {
 
   console.log('Seed complete.');
   console.log('Login credentials:');
-  console.log('  Admin        -> admin@hostel.edu / admin123');
-  console.log('  Mess Manager -> manager@hostel.edu / manager123');
+  console.log('  Admin        -> admin@gmail.com / admin123');
+  console.log('  Mess Manager -> manager@gmail.com / manager123');
   console.log('  Student      -> abc@gmail.com / 123');
 
   await mongoose.connection.close();

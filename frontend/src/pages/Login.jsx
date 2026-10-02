@@ -49,7 +49,7 @@ const Login = () => {
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 focus:border-forest outline-none"
-            placeholder="you@hostel.edu"
+            placeholder="you@gmail.com"
           />
         </div>
         <div>
@@ -90,24 +90,24 @@ const Login = () => {
           </button>
           <button
             type="button"
-            onClick={() => setForm({ email: 'manager@hostel.edu', password: '123' })}
+            onClick={() => setForm({ email: 'manager@gmail.com', password: 'manager123' })}
             className="px-3 py-2 rounded-lg bg-paper border border-ink/15 hover:border-forest text-left transition-colors cursor-pointer"
           >
             <div className="font-bold text-turmeric-dark flex items-center gap-1.5">
               <ChefHat className="w-4 h-4 shrink-0" /> Mess Manager
             </div>
-            <div className="text-[10px] text-ink/50 font-mono">manager@hostel.edu</div>
-            <div className="text-[10px] text-ink/40 font-mono">Pass: 123 / manager123</div>
+            <div className="text-[10px] text-ink/50 font-mono">manager@gmail.com</div>
+            <div className="text-[10px] text-ink/40 font-mono">Pass: manager123</div>
           </button>
           <button
             type="button"
-            onClick={() => setForm({ email: 'admin@hostel.edu', password: 'admin123' })}
+            onClick={() => setForm({ email: 'admin@gmail.com', password: 'admin123' })}
             className="px-3 py-2 rounded-lg bg-paper border border-ink/15 hover:border-forest text-left transition-colors cursor-pointer"
           >
             <div className="font-bold text-clay flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 shrink-0" /> Admin
             </div>
-            <div className="text-[10px] text-ink/50 font-mono">admin@hostel.edu</div>
+            <div className="text-[10px] text-ink/50 font-mono">admin@gmail.com</div>
             <div className="text-[10px] text-ink/40 font-mono">Pass: admin123</div>
           </button>
         </div>
