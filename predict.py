@@ -163,7 +163,15 @@ def predict_all(input_data):
     req_kg = round(max(0.0, float(_req_model.predict(df)[0])), 2)
     raw_waste_plates = float(_waste_model.predict(df)[0])
     predicted_waste_plates = max(0, min(total_students, int(round(raw_waste_plates))))
-    
+
+    # Sanity floor: food required can never be less than
+    # expected_total_attendance * 0.35 kg/plate (minimum realistic serving)
+    min_food_kg = round(expected_total * 0.35, 2)
+    if req_kg < min_food_kg:
+        req_kg = min_food_kg
+
+    # Consumption = expected diners minus plates wasted
+    # (always plate-based, never derived from kg)
     estimated_consumption_plates = max(0, expected_total - predicted_waste_plates)
     waste_pct = round((predicted_waste_plates / max(1, expected_total) * 100), 2)
 

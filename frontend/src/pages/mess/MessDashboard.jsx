@@ -514,10 +514,11 @@ const PredictionPanel = ({ onOpenAuditForm }) => {
                   savedPercent={Math.min(
                     100,
                     Math.round(
-                      (prediction.predictedConsumption / (prediction.recommendedPreparation || 1)) * 100
+                      ((prediction.estimated_consumption_plates ?? prediction.predictedConsumption ?? 0) /
+                        Math.max(1, prediction.expected_total_attendance ?? currentFinalDemand)) * 100
                     )
                   )}
-                  label="Fulfilment vs. Prepared"
+                  label="Fulfilment vs. Expected"
                 />
               </div>
 
