@@ -56,12 +56,58 @@
     "hyperparameters": "{'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': None, 'max_features': 1.0, 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'monotonic_cst': None, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': 42, 'verbose': 0, 'warm_start': False}"
   },
   "food_waste_model": {
-    "algorithm": "Random Forest (Tuned)",
+    "algorithm": "Gradient Boosting (Tuned)",
+    "dataset": "hostel_food_waste_dataset.csv",
+    "total_rows": 10000,
+    "training_rows": 8000,
+    "testing_rows": 2000,
     "target": "wasted_plates",
-    "mae": 4.3449,
-    "mse": 36.4477,
-    "rmse": 6.0372,
-    "r2": 0.6331,
-    "hyperparameters": "{'regressor__max_depth': 10, 'regressor__min_samples_leaf': 2, 'regressor__min_samples_split': 2, 'regressor__n_estimators': 100}"
+    "feature_columns": [
+      "Day_of_Week",
+      "Meal_Type",
+      "Weather",
+      "Exam_Period",
+      "Festival",
+      "Weekend",
+      "Hostel_Occupancy",
+      "Temperature",
+      "Planned_Meals"
+    ],
+    "categorical_features": [
+      "Day_of_Week",
+      "Meal_Type",
+      "Weather",
+      "Exam_Period",
+      "Festival",
+      "Weekend"
+    ],
+    "numerical_features": [
+      "Hostel_Occupancy",
+      "Temperature",
+      "Planned_Meals"
+    ],
+    "excluded_leakage_columns": [
+      "Actual_Consumption",
+      "Surplus_Meals",
+      "Waste_Meals",
+      "wasted_plates"
+    ],
+    "split_strategy": "random_80_20",
+    "random_state": 42,
+    "mae": 17.9481,
+    "mse": 480.6468,
+    "rmse": 21.9237,
+    "r2": -0.0008,
+    "mae_after_rounding": 17.933,
+    "dummy_baseline_mae": 17.9624,
+    "model_pkl": "models\\food_waste_model_candidate.pkl",
+    "training_timestamp": "2026-10-15T17:23:11.487410",
+    "hyperparameters": "{'model__learning_rate': 0.05, 'model__max_depth': 3, 'model__min_samples_split': 5, 'model__n_estimators': 100}",
+    "assumptions": [
+      "1 Waste_Meals unit = 1 wasted plate",
+      "previous_day_wasted_plates NOT constructed (no stable per-hostel time series)",
+      "Actual_Consumption and Surplus_Meals excluded to prevent data leakage",
+      "Planned_Meals used as upper bound for bounding predictions"
+    ]
   }
 }
